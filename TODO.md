@@ -4,7 +4,7 @@
     - 新增
         - 添加书签(ButtonAddBookmark)
         - 添加标注(ButtonAddClip)
-- 项目上传github
+
 # 待办
 - 给按钮添加好用的toolTip
 - PDFViewer的书签功能修改
@@ -70,6 +70,9 @@
 
 
 已完成
+2024年8月8日17:39:30
+- 项目上传github
+
 - 实现封面图加载的机制
   - 1 实现pdfinfo加载封面图片
   - 2 实现当无封面图片时,需要用户先打开一次PDF,然后自动保存第一张图片
