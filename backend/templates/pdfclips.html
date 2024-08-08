@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <title>Document</title> -->
+    <link rel="stylesheet" href="./css/pdfclip.css">
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet"> -->
+    <title>PDF Reader Home Page</title>
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <script src="./js/qwebchannel.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            new QWebChannel(qt.webChannelTransport, function(channel) {
+                window.qt_js_bridge = channel.objects.qt_js_bridge;
+            });
+            const loadPDFInfoEvent = new CustomEvent("loadPDFClipsEvent");
+            setTimeout(() => {
+                document.dispatchEvent(loadPDFInfoEvent);
+            },100);            
+        });
+    </script>
+    <script type = 'module' defer src="./js/pdfclips.js" ></script>
+</head>
+<body class="m-0 p-0 border-0 m-0 border-0 ">
+    <div id="main-container" class=" p-0 m-0">
+        <div id="pdf-clips-container" class="container-fluid p-0 m-0 display-none">
+            <div id="pdf-clips-viewer" class="container-fluid p-0 m-0 overflow-auto">
+                <!-- <div class="card mb-3">
+                    <div class="text-center">
+                        <img src="../pdf_files/clips/clip1.jpg" id="pdfcode-pagenum-clipcode" alt="" srcset="" class="card-img-top">
+                    </div>
+                    <p class="card-footer">This is a wider</p>
+                </div>
+                <div class="card mb-3">
+                    <div class="text-center">
+                        <img src="../pdf_files/clips/clip2.jpg" id="pdfcode-pagenum-clipcode" alt="" srcset="" class="card-img-top">
+                    </div>
+                    <p class="card-footer">This is a wider</p>
+                </div>
+                <div class="card mb-3">
+                    <div class="text-center">
+                        <img src="../pdf_files/clips/clip3.jpg" id="pdfcode-pagenum-clipcode" alt="" srcset="" class="card-img-top">
+                    </div>
+                    <p class="card-footer">This is a wider</p>
+                </div>
+                <div class="card mb-3">
+                    <div class="text-center">
+                        <img src="../pdf_files/clips/clip4.jpg" id="pdfcode-pagenum-clipcode" alt="" srcset="" class="card-img-top">
+                    </div>
+                    <p class="card-footer">This is a wider</p>
+                </div> -->
+            </div>
+            <div id="pdf-clips-toolbar" class="" role="group">
+                <button id="pdf-clips-action-open" class=" p-1 btn btn-primary">open</button>
+                <button id="pdf-clips-action-delete" class=" p-1 btn btn-danger">delete clip</button>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

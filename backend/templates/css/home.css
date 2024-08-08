@@ -1,0 +1,114 @@
+.display-none{
+    display: none!important;
+}
+.UI-container-title{
+    display: flex;
+    
+}
+.UI-container-title > div{
+    flex-grow: 1;
+}
+
+*{  
+    transition: all 0.5s ease;
+}
+
+#main-container{
+    height: 100vh;
+    width: 100%;
+    display: flex;
+}
+
+    #pdf-table-container{
+        height: 100%;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+
+    }
+
+    #pdf-table-viewer>thead{
+        position: sticky;
+        top: 0;
+    }
+    #pdf-table-viewer-wrapper{
+        flex-grow: 1;
+    }
+    #pdf-table-btngroup{
+        display: flex;
+    }
+        #pdf-table-action-import{
+            flex-grow: 1;
+        }
+        #pdf-table-action-getInfo{
+            flex-grow: 1;
+        }
+        #pdf-table-action-read{
+            flex-grow: 1;
+        }
+        #pdf-table-action-getClip{
+            flex-grow: 1;
+        }
+#rightside-container{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+    #pdf-info-container{
+        min-height: 30vh;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+        #pdf-info-viewer-wrapper{
+            overflow: auto;
+            flex-grow: 1;
+        }
+        #pdf-info-thumb{
+            max-width:250px;
+        }
+        #pdf-info-toolbar{
+            display: flex;
+        }
+        #pdf-info-toolbar button {
+            flex-grow: 1;
+        }
+    #pdf-clips-container{
+        max-height: 70vh;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+            #pdf-clips-viewer{
+                min-height: 20vh;
+                overflow: auto;
+                flex-grow: 1;
+            }
+
+        #pdf-clips-toolbar{
+            display: flex;
+        }
+        #pdf-clips-action-open{
+            flex-grow: 1;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+#pdf-clips-viewer img{
+    max-width: 300px;
+}
+
+.table-row-selected{
+    background-color: rgb(94, 93, 93)!important;
+}

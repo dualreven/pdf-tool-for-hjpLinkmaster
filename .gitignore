@@ -1,0 +1,6 @@
+/node_modules/
+/dist/
+/.idea/
+/.vscode/
+/backend/pdf_files/
+/backend/__pycache__/

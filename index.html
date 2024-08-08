@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display PDF</title>
+    <!-- CSS -->
+    <!-- <base href="$base_url"> -->
+    <!-- <script type = 'module' src="./node_modules/simple-notify/dist/simple-notify.mjs"></script> -->
+<!-- JS -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.min.js"></script> -->
+    <link rel="resource" type="application/l10n" href="./web/locale/locale.json">
+    $is_dev_env
+
+    <script type="importmap">
+        {
+          "imports": {
+            "pdfjs-lib": "./web/src/pdf.js",
+            "pdfjs-web/": "./web/",
+
+            "fluent-bundle": "./node_modules/@fluent/bundle/esm/index.js",
+            "fluent-dom": "./node_modules/@fluent/dom/esm/index.js",
+            "cached-iterable": "./node_modules/cached-iterable/src/index.mjs",
+            "toastr":"./node_modules/toastr/build/toastr.min.js",
+            "sweetalert2":"./node_modules/sweetalert2/dist/sweetalert2.js",
+            "simple-notify":"./node_modules/simple-notify/dist/simple-notify.mjs",
+            "display-node_utils": "./web/src/display/stubs.js",
+            "display-fetch_stream": "./web/src/display/fetch_stream.js",
+            "display-network": "./web/src/display/network.js",
+            "display-node_stream": "./web/src/display/stubs.js",
+            "web-alt_text_manager": "./web/alt_text_manager.js",
+            "web-annotation_editor_params": "./web/annotation_editor_params.js",
+            "web-download_manager": "./web/download_manager.js",
+            "web-external_services": "./web/genericcom.js",
+            "web-null_l10n": "./web/genericl10n.js",
+            "web-pdf_attachment_viewer": "./web/pdf_attachment_viewer.js",
+            "web-pdf_cursor_tools": "./web/pdf_cursor_tools.js",
+            "web-pdf_document_properties": "./web/pdf_document_properties.js",
+            "web-pdf_find_bar": "./web/pdf_find_bar.js",
+            "web-pdf_layer_viewer": "./web/pdf_layer_viewer.js",
+            "web-pdf_outline_viewer": "./web/pdf_outline_viewer.js",
+            "web-pdf_presentation_mode": "./web/pdf_presentation_mode.js",
+            "web-pdf_sidebar": "./web/pdf_sidebar.js",
+            "web-pdf_thumbnail_viewer": "./web/pdf_thumbnail_viewer.js",
+            "web-preferences": "./web/genericcom.js",
+            "web-print_service": "./web/pdf_print_service.js",
+            "web-secondary_toolbar": "./web/secondary_toolbar.js",
+            "web-toolbar": "./web/toolbar.js"
+          }
+        }
+      </script>
+
+    <script src="./backend/templates/js/qwebchannel.js"></script>
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function() {
+            new QWebChannel(qt.webChannelTransport, function(channel) {
+                window.qt_js_bridge = channel.objects.qt_js_bridge;
+            });
+        });
+        function callPythonFunction() {
+            const data = "Hello from JavaScript";
+            window.qt_js_bridge.console_log(data).then(function(response) {
+                alert(response);
+            });
+        }
+    </script>
+    <script>
+        if (typeof Promise.withResolvers !== 'function') {
+            Promise.withResolvers = function() {
+                let resolve, reject;
+                const promise = new Promise((res, rej) => {
+                    resolve = res;
+                    reject = rej;
+                });
+                return { promise, resolve, reject };
+            };
+        }
+    </script>
+    <script type = 'module' defer src="./index.js"></script>
+    <script type = 'module' defer>
+        window.PDFNeedThumbnail = $checkPDFNeedThumbnail;
+        console.log("need thumbnail ",window.PDFNeedThumbnail)
+        window.PDFViewerApplicationDataInfo = JSON.parse('$pdf_viewer_application_data');
+        console.log(window.PDFViewerApplicationDataInfo)
+    </script>
+    <style>
+        #root-container {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 3fr 0fr;
+
+            grid-template-rows: 3fr 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="root-container">
+        <div id="pdf-container"></div>
+        <div id="pdf-clipper">
+            <div class="clipTool-div div-button hover-active">制卡1</div>
+            <div class="clipTool-div div-button hover-active">制卡1</div>
+            <div class="clipTool-div div-button hover-active">制卡1</div>
+            <button onclick="callPythonFunction()">Call Python Function</button>
+        </div>
+    </div>
+
+</body>
+</html>

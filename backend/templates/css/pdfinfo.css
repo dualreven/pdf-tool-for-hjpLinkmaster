@@ -1,0 +1,33 @@
+*{  
+    transition: all 0.5s ease;
+}
+
+.display-none{
+    display: none!important;
+}
+#main-container{
+    height:100vh;
+}
+#pdf-info-container{
+    min-height: 30vh;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+    #pdf-info-viewer-wrapper{
+        overflow: auto;
+        flex-grow: 1;
+    }
+    #pdf-info-thumb{
+        max-width:250px;
+    }
+    #pdf-info-toolbar{
+        display: flex;
+    }
+    #pdf-info-toolbar button {
+        flex-grow: 1;
+    }
+#pdf-info-viewer-wrapper{
+    overflow-y:auto;
+}
+
