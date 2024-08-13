@@ -266,7 +266,43 @@ See https://github.com/adobe-type-tools/cmap-resources
             </button>
           </div>
         </div>
-
+        <div id="DlgAddBookMark" class="secondaryToolbar doorHangerRight hidden" style="inset-inline-end: 46px;">
+          <div id="DlgAddBookMarkContainer">
+            <h4 style="text-align: center">添加当前页为书签</h4>
+            <div class="DlgAddBookMark-form-group">
+              <label for="DlgAddBookMark-Name">书签名</label>
+              <input type="text" id="DlgAddBookMark-Name" name="DlgAddBookMark-Name">
+            </div>
+            <div class="DlgAddBookMark-form-group">
+                <label for="DlgAddBookMark-parentBookmark">父书签</label>
+                <select id="DlgAddBookMark-parentBookmark" name="DlgAddBookMark-parentBookmark">
+                  <option value=""></option>
+                  <option value="bookmark1">书签1</option>
+                  <option value="bookmark2">书签2</option>
+                  <option value="bookmark3">书签3</option>
+                  <option value="bookmark1">书签1</option>
+                  <option value="bookmark2">书签2</option>
+                  <option value="bookmark3">书签3</option>
+                  <option value="bookmark1">书签1</option>
+                  <option value="bookmark2">书签2</option>
+                  <option value="bookmark3">书签3</option>
+                  <option value="bookmark1">书签1</option>
+                  <option value="bookmark2">书签2</option>
+                  <option value="bookmark3">书签3</option>
+                  <option value="bookmark1">书签1</option>
+                  <option value="bookmark2">书签2</option>
+                  <option value="bookmark3">书签3</option>
+                  <option value="bookmark1">书签1</option>
+                  <option value="bookmark2">书签2</option>
+                  <option value="bookmark3">书签3</option>
+              </select>
+            </div>
+            <div class="DlgAddBookMark-buttons">
+                <button id="DlgAddBookMark-btn-submit" type="button" >确定</button>
+                <button id="DlgAddBookMark-btn-cancel" type="button" >取消</button>
+            </div>
+          </div>   
+        </div>
         <div id="secondaryToolbar" class="secondaryToolbar hidden doorHangerRight">
           <div id="secondaryToolbarButtonContainer">
 <!--#if GENERIC-->
@@ -392,8 +428,11 @@ See https://github.com/adobe-type-tools/cmap-resources
               </div>
               <div id="toolbarViewerRight">
                 <div id="editorModeButtons" class="splitToolbarButton toggled" role="radiogroup">
+                  <button class="toolbarButton" id="BtnCreateClip">
+                    <svg t="1723112273161" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9233" width="100%" height="100%"><path d="M362.7 701.5c-11.5 0-23-4.4-31.7-13.1-17.5-17.5-17.5-45.9 0-63.4l513.6-513.6c17.5-17.5 45.9-17.5 63.4 0s17.5 45.9 0 63.4L394.4 688.4c-8.8 8.7-20.2 13.1-31.7 13.1z" fill="#333333" p-id="9234"></path><path d="M656.2 703.7c-11.5 0-23-4.4-31.7-13.1L108.7 174.8c-17.5-17.5-17.5-45.9 0-63.4s45.9-17.5 63.4 0l515.8 515.8c17.5 17.5 17.5 45.9 0 63.4-8.7 8.8-20.2 13.1-31.7 13.1z" fill="#333333" p-id="9235"></path><path d="M749.1 928.3c-97.3 0-176.5-79.2-176.5-176.5s79.2-176.5 176.5-176.5 176.5 79.2 176.5 176.5-79.2 176.5-176.5 176.5z m0-263.3c-47.8 0-86.8 38.9-86.8 86.8s38.9 86.8 86.8 86.8 86.8-38.9 86.8-86.8-39-86.8-86.8-86.8zM272.1 928.3c-97.3 0-176.5-79.2-176.5-176.5s79.2-176.5 176.5-176.5 176.5 79.2 176.5 176.5-79.2 176.5-176.5 176.5z m0-263.3c-47.8 0-86.8 38.9-86.8 86.8s38.9 86.8 86.8 86.8 86.8-38.9 86.8-86.8-39-86.8-86.8-86.8z" fill="#333333" p-id="9236"></path></svg>
+                  </button>
                   <button class="toolbarButton" id="BtnAddBookMark">
-                  <svg t="1723103673752" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4279" width="100%" height="100%"><path d="M864.711 534.847h-102.4v102.377c0 18.841-15.292 34.133-34.133 34.133s-34.134-15.292-34.134-34.133V534.847h-102.4c-18.841 0-34.133-15.27-34.133-34.134 0-18.841 15.292-34.133 34.133-34.133h102.4V364.157c0-18.841 15.292-34.133 34.134-34.133s34.133 15.292 34.133 34.133V466.58h102.4c18.842 0 34.133 15.292 34.133 34.133 0 18.865-15.291 34.134-34.133 34.134zM705.422 262.19c-18.841 0-34.133-15.292-34.133-34.134 0-0.318 0.16-0.523 0.182-0.842h-0.182v-23.142c0-18.682-15.292-33.838-34.133-33.838h-409.6c-18.842 0-34.134 15.156-34.134 33.838V830.646l238.956-181.567 238.91 181.567v-57.913h0.092c0.296-18.614 15.36-33.655 34.042-33.655s33.747 15.018 34.043 33.655h0.09v103.424c0 28.058-22.641 45.375-50.699 45.375L433.311 727.404 180.93 921.532c-28.057 0-55.773-17.317-55.773-45.375V147.98c0-28.034 17.476-45.51 45.51-45.51h523.378c28.035 0 45.512 17.476 45.512 45.51v79.235h-0.182c0.022 0.319 0.182 0.524 0.182 0.842 0 18.865-15.292 34.134-34.134 34.134z" fill="#777777" p-id="4280"></path></svg>
+                  <svg t="1723103673752" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4279" width="100%" height="100%"><path d="M864.711 534.847h-102.4v102.377c0 18.841-15.292 34.133-34.133 34.133s-34.134-15.292-34.134-34.133V534.847h-102.4c-18.841 0-34.133-15.27-34.133-34.134 0-18.841 15.292-34.133 34.133-34.133h102.4V364.157c0-18.841 15.292-34.133 34.134-34.133s34.133 15.292 34.133 34.133V466.58h102.4c18.842 0 34.133 15.292 34.133 34.133 0 18.865-15.291 34.134-34.133 34.134zM705.422 262.19c-18.841 0-34.133-15.292-34.133-34.134 0-0.318 0.16-0.523 0.182-0.842h-0.182v-23.142c0-18.682-15.292-33.838-34.133-33.838h-409.6c-18.842 0-34.134 15.156-34.134 33.838V830.646l238.956-181.567 238.91 181.567v-57.913h0.092c0.296-18.614 15.36-33.655 34.042-33.655s33.747 15.018 34.043 33.655h0.09v103.424c0 28.058-22.641 45.375-50.699 45.375L433.311 727.404 180.93 921.532c-28.057 0-55.773-17.317-55.773-45.375V147.98c0-28.034 17.476-45.51 45.51-45.51h523.378c28.035 0 45.512 17.476 45.512 45.51v79.235h-0.182c0.022 0.319 0.182 0.524 0.182 0.842 0 18.865-15.292 34.134-34.134 34.134z" fill="#333333" p-id="4280"></path></svg>
                 </button>
                 
                   <!-- <button id="editorHighlight" class="toolbarButton" hidden="true" disabled="disabled" title="Highlight" role="radio" aria-checked="false" aria-controls="editorHighlightParamsToolbar" tabindex="31" data-l10n-id="pdfjs-editor-highlight-button">

@@ -131,6 +131,19 @@ function getViewerConfiguration() {
         "editorStampParamsToolbar"
       ),
       download: document.getElementById("download"),
+      createClipButton: document.getElementById("BtnCreateClip"),
+    },
+    addBookMark:{
+      toggleButton: document.getElementById("BtnAddBookMark"),
+      cancelButton: document.getElementById("DlgAddBookMark-btn-cancel"),
+      submitButton: document.getElementById("DlgAddBookMark-btn-submit"),
+      container: document.getElementById("DlgAddBookMark"),
+      userInput: document.getElementById("DlgAddBookMark-Name"),
+      parentList: document.getElementById("DlgAddBookMark-parentBookmark"),
+      
+    },
+    clipSystem:{
+      toggleButton: document.getElementById("BtnCreateClip"),
     },
     secondaryToolbar: {
       toolbar: document.getElementById("secondaryToolbar"),

@@ -38,6 +38,7 @@ import {
   SidebarView,
   SpreadMode,
   TextLayerMode,
+  toggleExpandedBtn,
 } from "./ui_utils.js";
 import {
   AnnotationEditorType,
@@ -85,8 +86,8 @@ import { Preferences } from "web-preferences";
 import { SecondaryToolbar } from "web-secondary_toolbar";
 import { Toolbar } from "web-toolbar";
 import { ViewHistory } from "./view_history.js";
-
-
+import { AddBookMark } from "./component.add_bookmark.js";
+import {ClipSystem} from "./component.create_clip.js";
 const FORCE_PAGES_LOADED_TIMEOUT = 10000; // ms
 const WHEEL_ZOOM_DISABLED_TIMEOUT = 1000; // ms
 
@@ -146,6 +147,10 @@ const PDFViewerApplication = {
   toolbar: null,
   /** @type {SecondaryToolbar} */
   secondaryToolbar: null,
+  /** @type {AddBookMark} */
+  addbookmark: null,
+  /** @type {ClipSystem} */
+  clipSystem: null,
   /** @type {EventBus} */
   eventBus: null,
   /** @type {IL10n} */
@@ -498,7 +503,8 @@ const PDFViewerApplication = {
     if (!this.supportsIntegratedFind && appConfig.findBar) {
       this.findBar = new PDFFindBar(appConfig.findBar, eventBus);
     }
-
+    this.addbookmark = new AddBookMark(appConfig.addBookMark,eventBus);
+    this.clipSystem = new ClipSystem(appConfig.clipSystem, eventBus);
     if (appConfig.annotationEditorParams) {
       if (annotationEditorMode !== AnnotationEditorType.DISABLE) {
         if (AppOptions.get("enableStampEditor")) {
@@ -681,17 +687,17 @@ const PDFViewerApplication = {
           }
         }
       });
-      appConfig.mainContainer.addEventListener("drop", function (evt) {
-        if (evt.dataTransfer.files?.[0].type !== "application/pdf") {
-          return;
-        }
-        evt.preventDefault();
-        evt.stopPropagation();
-        eventBus.dispatch("fileinputchange", {
-          source: this,
-          fileInput: evt.dataTransfer,
-        });
-      });
+      // appConfig.mainContainer.addEventListener("drop", function (evt) {
+      //   if (evt.dataTransfer.files?.[0].type !== "application/pdf") {
+      //     return;
+      //   }
+      //   evt.preventDefault();
+      //   evt.stopPropagation();
+      //   eventBus.dispatch("fileinputchange", {
+      //     source: this,
+      //     fileInput: evt.dataTransfer,
+      //   });
+      // });
     }
 
     if (!AppOptions.get("supportsDocumentFonts")) {
@@ -1947,19 +1953,26 @@ const PDFViewerApplication = {
     eventBus._on("updatefindcontrolstate", webViewerUpdateFindControlState, {
       signal,
     });
-
-    if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
+    // const toggleAddbookmarkDialog=()=>{
+    //   toggleExpandedBtn(PDFViewerApplication.toolbar.);
+    // }
+    // eventBus._on("toggleAddbookmarkDialog",toggleAddbookmarkDialog,{signal});
+    const startCreateClip=()=>{
+      console.log("startCreateClip")
+    }
+    eventBus._on("startCreateClip",startCreateClip,{signal});
+    // if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
       // eventBus._on("fileinputchange", webViewerFileInputChange, { signal });
       // eventBus._on("openfile", webViewerOpenFile, { signal });
-    }
-    if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("MOZCENTRAL")) {
-      eventBus._on(
-        "annotationeditorstateschanged",
-        webViewerAnnotationEditorStatesChanged,
-        { signal }
-      );
-      eventBus._on("reporttelemetry", webViewerReportTelemetry, { signal });
-    }
+    // }
+    // if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("MOZCENTRAL")) {
+    //   eventBus._on(
+    //     "annotationeditorstateschanged",
+    //     webViewerAnnotationEditorStatesChanged,
+    //     { signal }
+    //   );
+    //   eventBus._on("reporttelemetry", webViewerReportTelemetry, { signal });
+    // }
   },
 
   bindWindowEvents() {
@@ -2498,6 +2511,7 @@ function webViewerFindFromUrlHash(evt) {
     matchDiacritics: true,
   });
 }
+
 
 function webViewerUpdateFindMatchesCount({ matchesCount }) {
   if (PDFViewerApplication.supportsIntegratedFind) {

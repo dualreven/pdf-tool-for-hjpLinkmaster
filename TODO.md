@@ -1,14 +1,24 @@
 # 当前
-- PDFViewer工具栏的修改
-    - 去掉全部工具
-    - 新增
-        - 添加书签(ButtonAddBookmark)
-        - 添加书签弹窗配置
-        - 添加标注(ButtonAddClip)
-        - 添加标注动作
-- 给按钮添加好用的toolTip
-# 待办
+- 解决keydown覆盖问题
+- 文件保存用uuid替代文件原名.
 
+
+# 待办
+- allRelatedCard按钮添加
+- reviewCard按钮添加
+    - 实现点击开始复习
+    
+- PDFOutlineObj
+    - uuid
+    - Outline
+    - created
+    - last_edit
+    - pdf_uuid
+
+
+- tooltip修改
+    - 删除原有的tooltip,最好直接转换
+    - 给按钮添加好用的toolTip
 - PDFViewer的书签功能修改
     - 从数据库加载书签,不从本身加载,只在第一次打开书本的时候获取.
         - 判断书籍是否发生过一次书签的获取
@@ -26,14 +36,8 @@
         - const [ref] = outline[0].dest
         - const pagenum = await PDFViewerApplication.pdfDocument.getPageIndex(ref)+1
 
-- PDFinfoObj中添加lastReadPage信息,大纲的uuid信息
 
-- PDFOutlineObj
-    - uuid
-    - Outline
-    - created
-    - last_edit
-    - pdf_uuid
+
 
 
 
@@ -72,6 +76,22 @@
 
 
 已完成
+2024年8月13日13:23:30
+- PDFinfoObj中添加lastReadPage信息,大纲的uuid信息
+- PDFViewer工具栏的修改
+    - 去掉全部工具
+    - 新增
+        - 添加书签(ButtonAddBookmark)
+        - 添加书签弹窗配置
+            - 需要学习搜索弹出怎么实现
+            - id="findbar"
+            - 搜索弹出是一个隐藏的元素,点击按钮后显示
+        - 添加标注(ButtonAddClip)
+        - 添加标注动作
+        
+2024年8月8日23:22:44
+- editToolbar删除(完成,将注册鼠标拖拽事件的函数注释了)
+
 2024年8月8日17:39:30
 - 项目上传github
 

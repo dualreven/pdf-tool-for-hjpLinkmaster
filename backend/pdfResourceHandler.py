@@ -1,6 +1,28 @@
 from .utils import *
 
 
+
+
+
+class PDFOutlineItem:
+    def __init__(self, title: str, page: int, uuid: str):
+        self.title = title
+        self.page = page
+        self.uuid = uuid
+        self.children:list[PDFOutlineItem] = []
+
+
+@dataclasses.dataclass
+class PDFOutlineObject:
+    pdf_uuid: str
+    uuid: str = dataclasses.field(default_factory=lambda: str(uuid.uuid4())[:8])
+    items: List[PDFOutlineItem] = dataclasses.field(default_factory=list)
+    created_at: int = dataclasses.field(default_factory=lambda: int(time.time()))
+    updated_at: int = dataclasses.field(default_factory=lambda: int(time.time()))
+
+    def to_dict(self):
+        return dataclasses.asdict(self)
+
 @dataclasses.dataclass
 class PDFInfoObject:
     book_name: str
@@ -10,6 +32,7 @@ class PDFInfoObject:
     clips_count: int = 0
     reading_progress: float = 0.0
     last_read_page: int = 0
+    outline:str = ""
     created_at: int = dataclasses.field(default_factory=lambda: int(time.time()))
     updated_at: int = dataclasses.field(default_factory=lambda: int(time.time()))
     read_at: int = dataclasses.field(default_factory=lambda: int(time.time()))

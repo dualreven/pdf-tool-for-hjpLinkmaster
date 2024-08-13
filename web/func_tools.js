@@ -17,3 +17,9 @@ export function uint8ArrayToBase64(uint8Array) {
         reader.readAsDataURL(blob);
     });
 }
+
+export function generate8CharUUID() {
+    return 'xxxxxxxx'.replace(/x/g, () => {
+        return (Math.random() * 16 | 0).toString(16);
+    });
+}

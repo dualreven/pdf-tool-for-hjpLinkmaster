@@ -35,4 +35,4 @@ class PdfClipsViewer(ProtoWebWindowClass):
 
 
     def get_dict(self):
-        return self.DB[self.uuid].to_dict()
+        return self.Clips_DB[self.uuid].to_dict()

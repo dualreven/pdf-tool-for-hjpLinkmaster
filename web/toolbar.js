@@ -59,6 +59,8 @@ class Toolbar {
       { element: options.next, eventName: "nextpage" },
       { element: options.zoomIn, eventName: "zoomin" },
       { element: options.zoomOut, eventName: "zoomout" },
+      // { element:options.addBookMarkButton,eventName:"toggleAddbookmarkDialog"},
+      // { element: options.createClipButton, eventName: "startCreateClip" },
       // { element: options.print, eventName: "print" },
       // { element: options.download, eventName: "download" },
       // {
@@ -128,13 +130,13 @@ class Toolbar {
       );
     }
 
-    eventBus._on("showannotationeditorui", ({ mode }) => {
-      switch (mode) {
-        case AnnotationEditorType.HIGHLIGHT:
-          options.editorHighlightButton.click();
-          break;
-      }
-    });
+    // eventBus._on("showannotationeditorui", ({ mode }) => {
+    //   switch (mode) {
+    //     case AnnotationEditorType.HIGHLIGHT:
+    //       options.editorHighlightButton.click();
+    //       break;
+    //   }
+    // });
 
     this.reset();
   }
@@ -230,10 +232,10 @@ class Toolbar {
     // Suppress context menus for some controls.
     scaleSelect.oncontextmenu = noContextMenu;
 
-    eventBus._on(
-      "annotationeditormodechanged",
-      this.#editorModeChanged.bind(this)
-    );
+    // eventBus._on(
+    //   "annotationeditormodechanged",
+    //   this.#editorModeChanged.bind(this)
+    // );
   }
 
   #editorModeChanged({ mode }) {

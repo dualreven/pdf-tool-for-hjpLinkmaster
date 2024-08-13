@@ -1285,3 +1285,32 @@ dialog :link {
     display: none;
   }
 }
+
+#DlgAddBookMarkContainer {
+  width: 300px;
+  margin: 5px auto;
+  padding: 2px;
+}
+.DlgAddBookMark-form-group {
+  margin-bottom: 15px;
+}
+.DlgAddBookMark-form-group label {
+  display: inline-block;
+  /* width: 60px; */
+}
+.DlgAddBookMark-form-group input[type="text"] {
+  width: 200px;
+  /* padding: 5px; */
+}
+.DlgAddBookMark-buttons {
+  text-align: center;
+}
+.DlgAddBookMark-buttons button {
+  /* font-size: 8px; */
+  cursor: pointer;
+}
+#DlgAddBookMark-parentBookmark{
+  width: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+}
