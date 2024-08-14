@@ -47,8 +47,8 @@ async function download(blobUrl, filename) {
 async function savePDF(blob, url){
   // const formData = new FormData();
   // formData.append('file', blob,url);
-  await window.qt_js_bridge.save_file_info(url);
-  const save_return = await window.qt_js_bridge.save_pdf(blob);
+  await window.backend.save_file_info(url);
+  const save_return = await window.backend.save_pdf(blob);
   // const result = await fetch('/api/v1/common/upload-pdf', {
   //   method: 'POST',
   //   body: formData

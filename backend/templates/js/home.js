@@ -180,7 +180,7 @@ class PDFDB {
     }
 
     async delete(uuid) {
-        await window.qt_js_bridge.delete_pdf(uuid);
+        await window.backend.delete_pdf(uuid);
         delete this.#data[uuid];
     }
 }
@@ -346,7 +346,7 @@ function get_table_selected_pdf_uuid(cfg) {
 
 async function initHome() {
 
-    const pdfList_str = await window.qt_js_bridge.fetch_pdf_list();
+    const pdfList_str = await window.backend.fetch_pdf_list();
     /**
      * @type {PDFDB}
      */
@@ -393,7 +393,7 @@ async function initHome() {
             target = target.parentNode;
         }
         if(target){
-            window.qt_js_bridge.open_pdf_viewer(target.id);
+            window.backend.open_pdf_viewer(target.id);
         }
         // if (target && target == table_selected) {
         //     table_selected.classList.remove("table-active");
@@ -406,21 +406,21 @@ async function initHome() {
         //     table_selected=target;
         // }
         // if(table_selected){
-        //     window.qt_js_bridge.open_pdf_info(table_selected.id);
+        //     window.backend.open_pdf_info(table_selected.id);
         // }
     })
     cfg.element.pdfTable.button.import.addEventListener("click",async ()=>{
       /**
        * @type {string[]}
        */
-      const result = await window.qt_js_bridge.import_new_pdf();
+      const result = await window.backend.import_new_pdf();
         if(result.length>0){
 
             for(const pdf_uuid of result){
               /**
                * @type {string}
                */
-              const pdf_info_str = await window.qt_js_bridge.fetch_pdf_info(pdf_uuid);
+              const pdf_info_str = await window.backend.fetch_pdf_info(pdf_uuid);
               pdfDB.add(parsePDFClipsInfoObject(pdf_info_str));
             }
             renderPDFList(cfg,pdfDB.getRecent());
@@ -429,7 +429,7 @@ async function initHome() {
     });
     cfg.element.pdfTable.button.getInfo.addEventListener("click",async ()=>{
         if(table_selected){
-            window.qt_js_bridge.open_pdf_info(table_selected.id);
+            window.backend.open_pdf_info(table_selected.id);
         }
         
     })
@@ -444,12 +444,12 @@ async function initHome() {
     })
     cfg.element.pdfTable.button.getClip.addEventListener("click",async ()=>{
         if(table_selected){
-            window.qt_js_bridge.open_pdf_clips(table_selected.id);
+            window.backend.open_pdf_clips(table_selected.id);
         }
     })
     cfg.element.pdfTable.button.read.addEventListener("click",async ()=>{
         if(table_selected){
-            window.qt_js_bridge.open_pdf_viewer(table_selected.id);
+            window.backend.open_pdf_viewer(table_selected.id);
         }
     })
     // cfg.element.pdfInfo.button.close.addEventListener("click",async ()=>{
@@ -463,7 +463,7 @@ async function initHome() {
     //     cfg.element.pdfClips.viewer.body.innerHTML=""
     //     cfg.element.pdfClips.viewer.body.setAttribute("data-pdf-uuid",pdf_uuid);
     //     for (const uuid of pdf_info.clips) {
-    //         const clip_info_str = await window.qt_js_bridge.fetch_clip_info(uuid);
+    //         const clip_info_str = await window.backend.fetch_clip_info(uuid);
     //         const clip_info = parseClipInfoObject(clip_info_str);
     //         cfg.element.pdfClips.viewer.body.innerHTML += create_pdf_clips_card(clip_info);
     //     }

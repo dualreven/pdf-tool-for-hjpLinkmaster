@@ -40,7 +40,7 @@ function parsePDFClipsInfoObject(jsonString) {
   
 
 async function render_clips(){
-    const pdfclips_info_str = await window.qt_js_bridge.fetch_pdfclips_info();
+    const pdfclips_info_str = await window.backend.fetch_pdfclips_info();
     console.log(pdfclips_info_str);
     const pdfclips_info_obj = parsePDFClipsInfoObject(pdfclips_info_str);
     const cardContainer = document.getElementById("pdf-clips-viewer");

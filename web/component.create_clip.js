@@ -104,7 +104,7 @@ class ClipSystem{
     #bindEvents(){
         this.toggleButton.addEventListener("click", this.toggle.bind(this));
         let self = this;
-        document.addEventListener('keydown', function(event) {
+        window.addEventListener('keydown', function(event) {
             if (event.altKey && event.key === 'c') {
                 self.start();
             }

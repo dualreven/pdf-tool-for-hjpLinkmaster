@@ -1,16 +1,21 @@
 # 当前
-- 解决keydown覆盖问题
+
 - 文件保存用uuid替代文件原名.
 
-
 # 待办
+- clip创建完成后应与后端通信
+- clip在page刷新时应保持相对位置不变
 - allRelatedCard按钮添加
 - reviewCard按钮添加
     - 实现点击开始复习
     
 - PDFOutlineObj
     - uuid
-    - Outline
+    - items
+        - List[]
+            - name
+            - page
+            - items
     - created
     - last_edit
     - pdf_uuid
@@ -76,6 +81,10 @@
 
 
 已完成
+2024年8月13日15:59:00
+- 解决keydown覆盖问题
+- 换CSS加载文件为本地文件
+
 2024年8月13日13:23:30
 - PDFinfoObj中添加lastReadPage信息,大纲的uuid信息
 - PDFViewer工具栏的修改

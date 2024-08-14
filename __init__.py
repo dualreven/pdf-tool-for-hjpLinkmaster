@@ -396,7 +396,7 @@ class PDFViewer(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
         self.channel = QWebChannel(self)
         self.js_bridge = JsBridge(self)
-        self.channel.registerObject("qt_js_bridge", self.js_bridge)
+        self.channel.registerObject("backend", self.js_bridge)
         
         self.server = QWebSocketServer("FileTransferServer", QWebSocketServer.SslMode.NonSecureMode)
         self.server.listen(QHostAddress.SpecialAddress.LocalHost,1027)
@@ -433,7 +433,7 @@ class PDFViewer(QMainWindow):
 
     @pyqtSlot()
     def initiateFileTransfer(self):
-        self.browser.page().runJavaScript("qt_js_bridge.startWebSocket('ws://localhost:12345');")
+        self.browser.page().runJavaScript("backend.startWebSocket('ws://localhost:12345');")
     def on_text_message_received(self, message):
         data = json.loads(message)
         
@@ -494,7 +494,7 @@ class PDFViewer(QMainWindow):
 #         self.server.listen(QHostAddress.SpecialAddress.LocalHost,1027)
 #         self.channel = QWebChannel(self)
 #         self.js_bridge = JsBridge(self)
-#         self.channel.registerObject("qt_js_bridge", self.js_bridge)
+#         self.channel.registerObject("backend", self.js_bridge)
 #         self.browser.page().setWebChannel(self.channel)
 
 from backend.homePage import PDFReadingHome

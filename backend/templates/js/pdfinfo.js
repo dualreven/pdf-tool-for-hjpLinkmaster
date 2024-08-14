@@ -109,7 +109,7 @@ function parsePDFClipsInfoObject(jsonString) {
   
 
 document.addEventListener("loadPDFInfoEvent", async function() {
-    const pdf_info_str = await window.qt_js_bridge.fetch_pdf_info()
+    const pdf_info_str = await window.backend.fetch_pdf_info()
     const pdf_info = parsePDFClipsInfoObject(pdf_info_str)
     const cfg = homeConfiguration
     cfg.element.pdfInfo.viewer.body.innerHTML = create_pdf_info_card(pdf_info);

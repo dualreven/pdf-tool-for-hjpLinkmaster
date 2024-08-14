@@ -26,7 +26,7 @@ YELLOW = "\033[33m"
 BLUE = "\033[34m"
 RESET = "\033[0m"
 TYPE_PDF_UUID = TYPE_BOOK_NAME = TYPE_PDFCLIPS_UUID = str
-
+BACKEND_NAME = "backend"
 
 
 def class_to_dict(cls):

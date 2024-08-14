@@ -1,9 +1,10 @@
 from .utils import *
+
 class ProtoJsBridge(QObject):
     def __init__(self, superior):
         super().__init__()
         self.superior = superior
-    
+
 
 class ProtoWebWindowClass(QMainWindow):
     def __init__(self, src: str, js_bridge: Type[QObject]):
@@ -32,7 +33,7 @@ class ProtoWebWindowClass(QMainWindow):
         self.set_web(src)
         self.channel = QWebChannel(self)
         self.js_bridge = js_bridge(self)
-        self.channel.registerObject("qt_js_bridge", self.js_bridge)
+        self.channel.registerObject(BACKEND_NAME, self.js_bridge)
         self.browser.page().setWebChannel(self.channel)
         # self.dev_tools.hide()
 

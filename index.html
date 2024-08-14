@@ -55,12 +55,12 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             new QWebChannel(qt.webChannelTransport, function(channel) {
-                window.qt_js_bridge = channel.objects.qt_js_bridge;
+                window.backend = channel.objects.backend;
             });
         });
         function callPythonFunction() {
             const data = "Hello from JavaScript";
-            window.qt_js_bridge.console_log(data).then(function(response) {
+            window.backend.console_log(data).then(function(response) {
                 alert(response);
             });
         }

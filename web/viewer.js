@@ -271,7 +271,7 @@ async function checkPDFThumbnailsCreated() {
     // document.body.appendChild(canvas);
     await page.render(renderContext).promise;
     const base64String = canvas.toDataURL("image/png");
-    const result = await window.qt_js_bridge.save_thumbnail(base64String);
+    const result = await window.backend.save_thumbnail(base64String);
     console.log("thumbnail save",result)
     window.PDFNeedThumbnail = false
   }
