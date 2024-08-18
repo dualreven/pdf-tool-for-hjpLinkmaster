@@ -34,23 +34,58 @@ class PDFViewerJsBridge(QObject):
         except Exception as e:
             return str(e)
 
+    @pyqtSlot(str,result=str)
+    def upload_pdf_outline(self,data_str):
+        """
+        Args:
+            str: jsonString
+            {
+                pdf_uuid:
+                uuid:
+                items:[
+                    {
+                        title:
+                        page:
+                        items:[]
+                    },
+                    {
+                        title:
+                        page:
+                        items:[]
+                    }
+                ]
+                created_at:
+                updated_at:
+            }
+        Returns:
 
+        """
+        self.superior.upload_pdf_outline(data_str)
 
+    @pyqtSlot(str, result=str)
+    def fetch_pdf_outline(self, pdf_uuid):
+        outline_uuid = self.superior.DB[pdf_uuid].outline
+        return json.dumps(self.superior.outline_DB[outline_uuid].to_dict())
 
+    @pyqtSlot(result=str)
+    def fetch_pdf_info(self):
+        return json.dumps(self.superior.DB[self.superior.pdf_uuid].to_dict())
 
 class PDFViewer(ProtoWebWindowClass):
     def __init__(self,superior,pdf_uuid:str):
         from .homePage import PDFReadingHome
         self.superior: PDFReadingHome = superior
         self.pdf_uuid = pdf_uuid
+        self.DB: PDFInfoDataBase = PDFInfoDataBase()
+        self.outline_DB:PDFOutLineDataBase = PDFOutLineDataBase()
         super().__init__(templates.pdfViewer,PDFViewerJsBridge)
-        self.setWindowTitle(f"PDF viewer of {self.superior.DB[self.pdf_uuid].book_name}")
+        self.setWindowTitle(f"PDF viewer of {self.DB[self.pdf_uuid].book_name}")
 
 
 
     def set_web(self, src: str):
         html_template = Template(open(src, "r", encoding="utf-8").read())
-        pdfinfo = self.superior.DB[self.pdf_uuid]
+        pdfinfo = self.DB[self.pdf_uuid]
         pdf_socketInfo_str = json.dumps({"pdf_uuid": self.pdf_uuid,"pdf_name": pdfinfo.book_name+".pdf","cmd":EnumStatus.Action.FETCH_PDF_FILE})
         html=html_template.safe_substitute(
                 is_dev_env=is_dev_env_inject if is_dev_env else ""
@@ -62,3 +97,12 @@ class PDFViewer(ProtoWebWindowClass):
     def closeEvent(self, a0:Optional[QCloseEvent]) -> None:
         self.superior.opened_pdfViewer.pop(self.pdf_uuid)
         super().closeEvent(a0)
+
+    def upload_pdf_outline(self,jsonString:str):
+        outline_dict = json.loads(jsonString)
+        outline_obj = PDFOutlineObject(**outline_dict)
+        self.DB[self.pdf_uuid].outline = outline_obj.outline_uuid
+        self.outline_DB[outline_obj.outline_uuid] = outline_obj
+        self.outline_DB.save_database()
+
+        pass

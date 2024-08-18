@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /** @typedef {import("./interfaces.js").IL10n} IL10n */
 // eslint-disable-next-line max-len
 /** @typedef {import("../src/display/api.js").PDFDocumentProxy} PDFDocumentProxy */
@@ -88,6 +87,8 @@ import { Toolbar } from "web-toolbar";
 import { ViewHistory } from "./view_history.js";
 import { AddBookMark } from "./component.add_bookmark.js";
 import {ClipSystem} from "./component.create_clip.js";
+import {PDFInfoObject, PDFOutlineObject} from "./types.js"
+import {get_PDFInfoObj} from "./func_tools.js"
 const FORCE_PAGES_LOADED_TIMEOUT = 10000; // ms
 const WHEEL_ZOOM_DISABLED_TIMEOUT = 1000; // ms
 
@@ -157,6 +158,8 @@ const PDFViewerApplication = {
   l10n: null,
   /** @type {AnnotationEditorParams} */
   annotationEditorParams: null,
+  /** @type {PDFInfoObject} */
+  pdf_info:null,
   isInitialViewSet: false,
   downloadComplete: false,
   isViewerEmbedded: window.parent !== window,
@@ -642,7 +645,7 @@ const PDFViewerApplication = {
   async run(config) {
     this.preferences = new Preferences();
     await this.initialize(config);
-
+    this.pdf_info = await get_PDFInfoObj();
     const { appConfig, eventBus } = this;
     let file;
     if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
@@ -735,6 +738,8 @@ const PDFViewerApplication = {
     } else {
       throw new Error("Not implemented: run");
     }
+    
+    console.log(this.pdf_info)
   },
 
   get externalServices() {
@@ -1432,16 +1437,28 @@ const PDFViewerApplication = {
         type: "pageInfo",
         timestamp: data.timestamp,
       });
-
-      if (this.pdfOutlineViewer) {
-        pdfDocument.getOutline().then(outline => {
-          console.log("Outline: " ,outline);
-          if (pdfDocument !== this.pdfDocument) {
-            return; // The document was closed while the outline resolved.
+      // let outline;
+      if (this.pdf_info.outline===""){
+        this.pdfOutlineViewer.convert_OldOutline_to_newOutline().then(
+          new_outline=>{
+            this.pdfOutlineViewer.render({ new_outline, pdfDocument });
+            window.backend.upload_pdf_outline(JSON.stringify(new_outline.toDict()))
           }
-          this.pdfOutlineViewer.render({ outline, pdfDocument });
-        });
+        )
       }
+      else{
+        PDFOutlineObject.from_backend(this.pdf_info.outline).then(outline=>{
+          this.pdfOutlineViewer.render({ outline, pdfDocument });
+        })
+      }
+      // if (this.pdfOutlineViewer) {
+      //   pdfDocument.getOutline().then(outline => {
+      //     if (pdfDocument !== this.pdfDocument) {
+      //       return; // The document was closed while the outline resolved.
+      //     }
+      //     this.pdfOutlineViewer.render({ outline, pdfDocument });
+      //   });
+      // }
       if (this.pdfAttachmentViewer) {
         pdfDocument.getAttachments().then(attachments => {
           if (pdfDocument !== this.pdfDocument) {

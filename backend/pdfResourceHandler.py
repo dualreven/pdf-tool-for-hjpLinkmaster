@@ -1,27 +1,47 @@
 from .utils import *
-
+from .protoDataBase import ProtoDataBase
 
 
 
 
 class PDFOutlineItem:
-    def __init__(self, title: str, page: int, uuid: str):
+    def __init__(self, title: str, page: int,items:dict):
         self.title = title
         self.page = page
-        self.uuid = uuid
-        self.children:list[PDFOutlineItem] = []
+        self.items:list[PDFOutlineItem] = [PDFOutlineItem(**item) for item in items]
 
+    def to_dict(self):
+        d={}
+        d["title"]=self.title
+        d["page"]=self.page
+        d["items"]=[]
+        for child in self.items:
+            d["items"].append(child.to_dict())
+
+        return d
 
 @dataclasses.dataclass
 class PDFOutlineObject:
-    pdf_uuid: str
-    uuid: str = dataclasses.field(default_factory=lambda: str(uuid.uuid4())[:8])
-    items: List[PDFOutlineItem] = dataclasses.field(default_factory=list)
-    created_at: int = dataclasses.field(default_factory=lambda: int(time.time()))
-    updated_at: int = dataclasses.field(default_factory=lambda: int(time.time()))
+
+    def __init__(self,pdf_uuid,outline_uuid,items,created_at,updated_at):
+        self.pdf_uuid:str = pdf_uuid
+        self.outline_uuid:str = outline_uuid
+        self.items:list[PDFOutlineItem] = items
+        self.created_at:int = created_at
+        self.updated_at:int = updated_at
+
+
 
     def to_dict(self):
-        return dataclasses.asdict(self)
+        d={}
+        d["pdf_uuid"]=self.pdf_uuid
+        d["uuid"]=self.uuid
+        d["items"]=[]
+        for item in self.items:
+            d["items"].append(item.to_dict())
+        return d
+
+
 
 @dataclasses.dataclass
 class PDFInfoObject:
@@ -46,6 +66,10 @@ class PDFInfoObject:
         return dataclasses.asdict(self)
 
 
+class CLIP_TYPE:
+    IMAGE=0
+    TEXT=1
+
 @dataclasses.dataclass()
 class PDFClipInfoObject:
     pdf_uuid: str
@@ -56,7 +80,7 @@ class PDFClipInfoObject:
     created_at: int = dataclasses.field(default_factory=lambda: int(time.time()))
     edit_at: int = dataclasses.field(default_factory=lambda: int(time.time()))
     comment: str = ""
-
+    clip_type:int = CLIP_TYPE.IMAGE
     def to_dict(self):
         return dataclasses.asdict(self)
 
@@ -126,44 +150,42 @@ class LargeFileServer(QWebSocketServer):
         super().__init__("FileTransferServer", QWebSocketServer.SslMode.NonSecureMode)
 
 
-class PDFInfoDataBase:
-    _instance = None
+class PDFOutLineDataBase(ProtoDataBase):
+    @property
+    def DBItem(self, *args, **kwargs):
+        return PDFOutlineObject
 
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+    @property
+    def infofile_path(self):
+        return outline_infofile_path.resolve()
+
+
+class PDFClipsDataBase(ProtoDataBase):
+
+    @property
+    def DBItem(self, *args, **kwargs):
+        return PDFClipInfoObject
+
+    @property
+    def infofile_path(self):
+        return clips_infofile_path.resolve()
+
+
+
+
+class PDFInfoDataBase(ProtoDataBase):
 
     def __init__(self):
-        if not hasattr(self, '_initialized'):
-            self.infofile_path = PDF_infofile_path.resolve()
-            self._book_name_data: dict[TYPE_BOOK_NAME, PDFInfoObject] = {}
-            self._uuid_data: dict[TYPE_PDF_UUID, PDFInfoObject] = {}
-            primitive_data = self.load_all_from_disk()
-            need_save = False
-            for key, value in primitive_data.items():
-                pdf_info = PDFInfoObject(**value)
-                if os.path.exists(os.path.join(PDF_file_path, pdf_info.book_name + ".pdf")) \
-                        and pdf_info.book_name not in self:
-                    self.set_data(pdf_info)
-                else:
-                    need_save = True
+        self._book_name_data: dict[TYPE_BOOK_NAME, PDFInfoObject] = {}
+        super().__init__()
 
-            # 判断是否有遗漏
-            for filename in os.listdir(PDF_file_path):  # 读取遗漏的文件
-                # 构造完整路径
-                full_path = os.path.join(PDF_file_path, filename)
-                # 检查是否是文件以及扩展名是否为.pdf
-                if os.path.isfile(full_path) and filename.lower().endswith('.pdf'):
-                    book_name = filename[:-4]
-                    if book_name not in self:
-                        need_save = True
-                        new_data = PDFInfoObject(book_name=book_name)
-                        self.set_data(new_data)
+    @property
+    def infofile_path(self):
+        return PDF_infofile_path.resolve()
 
-            if need_save:
-                self.save_database()
-            self._initialized = True
+    @property
+    def DBItem(self, *args, **kwargs):
+        return PDFInfoObject
 
     def __getitem__(self, key):
         if key in self._uuid_data:
@@ -189,9 +211,6 @@ class PDFInfoDataBase:
     def __setitem__(self, key, value: "PDFInfoObject"):
         raise NotImplementedError
 
-    #     assert type(key)==str and type(value)==PDFInfoObject
-    #     self._book_name_data[key] = value
-    #     self._uuid_data[key] = value
     def set_data(self, data: "PDFInfoObject"):
         assert type(data) == PDFInfoObject
         self._book_name_data[data.book_name] = data
@@ -208,82 +227,9 @@ class PDFInfoDataBase:
                 pdf_files.append(filename[:-4])
         return pdf_files
 
-    def save_database(self):
-        data = {}
-        for key, value in self._uuid_data.items():
-            data[key] = value.to_dict()
-        with open(self.infofile_path, 'w') as file:
-            json.dump(data, file)
 
     def save_new_pdf(self, pdf_url):
         PDF_fileHandler.save_file(pdf_url)
 
-    def load_all_from_disk(self) -> dict:
-        with open(self.infofile_path, 'r',encoding='utf-8') as file:
-            if file == "":
-                file = "{}"
-            pdf_info_list = json.load(file)
-        return pdf_info_list
 
-
-class PDFClipsDataBase:
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
-    def __init__(self):
-        if not hasattr(self, '_initialized'):
-            self.infofile_path = clips_infofile_path.resolve()
-            # self._book_name_data: dict[TYPE_PDFCLIPS_UUID, PDFInfoObject] = {}
-            self._uuid_data: dict[TYPE_PDFCLIPS_UUID, PDFClipInfoObject] = {}
-            primitive_data = self.load_all_from_disk()
-            for key,value in primitive_data.items():
-                pdf_info = PDFClipInfoObject(**value)
-                self.set_data(pdf_info)
-            self._initialized = True
-
-    def __getitem__(self, key):
-        if key in self._uuid_data:
-            return self._uuid_data[key]
-        else:
-            raise KeyError(f"{key} not in {self.__class__.__name__}")
-
-    def __contains__(self, key):
-        return key in self._uuid_data
-
-    def __delitem__(self, key):
-        if key in self._uuid_data:
-            del self._uuid_data[key]
-        else:
-            raise KeyError(f"{key} not in {self.__class__.__name__}")
-
-    def __setitem__(self, key, value: "PDFClipInfoObject"):
-        raise NotImplementedError
-
-    #     assert type(key)==str and type(value)==PDFInfoObject
-    #     self._book_name_data[key] = value
-    #     self._uuid_data[key] = value
-    def set_data(self, data: "PDFClipInfoObject"):
-        assert type(data) == PDFClipInfoObject
-        self._uuid_data[data.uuid] = data
-
-    def save_database(self):
-        data = {}
-        for key, value in self._uuid_data.items():
-            data[key] = value.to_dict()
-        with open(self.infofile_path, 'w') as file:
-            json.dump(data, file)
-
-    def save_new_pdf(self, pdf_url):
-        PDF_fileHandler.save_file(pdf_url)
-
-    def load_all_from_disk(self) -> dict:
-        with open(self.infofile_path.resolve(), 'r',encoding='utf-8') as file:
-            if file == "":
-                file = "{}"
-            pdf_info_dict = json.load(file)
-        return pdf_info_dict
 

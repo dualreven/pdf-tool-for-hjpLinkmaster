@@ -276,12 +276,11 @@ async function checkPDFThumbnailsCreated() {
     window.PDFNeedThumbnail = false
   }
 }
-
 async function webViewerLoad() {
   /**
    * @type {PDFSocketInfo}
    */
-  const pdfsocketinfo = window.PDFViewerApplicationDataInfo
+  const pdfsocketinfo = window.PDFViewerApplicationSocketDataInfo
   const config = getViewerConfiguration();
   const pdf_data = {data:null,filename:pdfsocketinfo.pdf_name};
   const { socket, dataPromise } = initializeWebSocket(pdfsocketinfo);

@@ -20,8 +20,41 @@
 // eslint-disable-next-line max-len
 /** @typedef {import("../src/display/api.js").PDFDocumentProxy} PDFDocumentProxy */
 
+/**
+ * @typedef {Object} OldOutline_Destination
+ * @property {number} num
+ * @property {number} gen
+ * @property {string} name
+ */
+
+/**
+ * @typedef {Object} OldOutline_Color
+ * @property {number} 0
+ * @property {number} 1
+ * @property {number} 2
+ */
+
+/**
+ * @typedef {Object} PDFOutlineItem
+ * @property {string} title
+ * @property {OldOutline_Destination[]} dest
+ * @property {string|null} action
+ * @property {string|null} url
+ * @property {OldOutline_Color} color
+ * @property {boolean} bold
+ * @property {boolean} italic
+ * @property {PDFOutlineItem[]} items
+ */
+
+/**
+ * @typedef {PDFOutlineItem[]} OldPDFOutline
+ */
+
+
 import { BaseTreeViewer } from "./base_tree_viewer.js";
 import { SidebarView } from "./ui_utils.js";
+import { PDFOutlineObject } from "./types.js"
+import {PDFViewerApplication} from "./app.js"
 
 /**
  * @typedef {Object} PDFOutlineViewerOptions
@@ -33,7 +66,7 @@ import { SidebarView } from "./ui_utils.js";
 
 /**
  * @typedef {Object} PDFOutlineViewerRenderParameters
- * @property {Array|null} outline - An array of outline objects.
+ * @property {PDFOutlineObject} outline - An array of outline objects.
  * @property {PDFDocumentProxy} pdfDocument - A {PDFDocument} instance.
  */
 
@@ -67,6 +100,11 @@ class PDFOutlineViewer extends BaseTreeViewer {
     this.eventBus._on("sidebarviewchanged", evt => {
       this._sidebarView = evt.view;
     });
+    if (!PDFViewerApplication.pdf_info.outline){
+      this.convert_OldOutline_to_newOutline();
+    }
+
+
   }
 
   reset() {
@@ -109,52 +147,53 @@ class PDFOutlineViewer extends BaseTreeViewer {
    */
   _bindLink(
     element,
-    { url, newWindow, action, attachment, dest, setOCGState }
+    // { url, newWindow, action, attachment, page, setOCGState },
+    { page}
   ) {
     const { linkService } = this;
 
-    if (url) {
-      linkService.addLinkAttributes(element, url, newWindow);
-      return;
-    }
-    if (action) {
-      element.href = linkService.getAnchorUrl("");
-      element.onclick = () => {
-        linkService.executeNamedAction(action);
-        return false;
-      };
-      return;
-    }
-    if (attachment) {
-      element.href = linkService.getAnchorUrl("");
-      element.onclick = () => {
-        this.downloadManager.openOrDownloadData(
-          attachment.content,
-          attachment.filename
-        );
-        return false;
-      };
-      return;
-    }
-    if (setOCGState) {
-      element.href = linkService.getAnchorUrl("");
-      element.onclick = () => {
-        linkService.executeSetOCGState(setOCGState);
-        return false;
-      };
-      return;
-    }
+    // if (url) {
+    //   linkService.addLinkAttributes(element, url, newWindow);
+    //   return;
+    // }
+    // if (action) {
+    //   element.href = linkService.getAnchorUrl("");
+    //   element.onclick = () => {
+    //     linkService.executeNamedAction(action);
+    //     return false;
+    //   };
+    //   return;
+    // }
+    // if (attachment) {
+    //   element.href = linkService.getAnchorUrl("");
+    //   element.onclick = () => {
+    //     this.downloadManager.openOrDownloadData(
+    //       attachment.content,
+    //       attachment.filename
+    //     );
+    //     return false;
+    //   };
+    //   return;
+    // }
+    // if (setOCGState) {
+    //   element.href = linkService.getAnchorUrl("");
+    //   element.onclick = () => {
+    //     linkService.executeSetOCGState(setOCGState);
+    //     return false;
+    //   };
+    //   return;
+    // }
 
-    element.href = linkService.getDestinationHash(dest);
+    // element.href = linkService.getDestinationHash(dest);
     element.onclick = evt => {
       this._updateCurrentTreeItem(evt.target.parentNode);
-
-      if (dest) {
-        linkService.goToDestination(dest);
-      }
+      linkService.goToPage(page)
+      // if (page) {
+      //   linkService.goToDestination(dest);
+      // }
       return false;
     };
-  }
+  };
 
   /**
    * @private
@@ -170,25 +209,26 @@ class PDFOutlineViewer extends BaseTreeViewer {
 
   /**
    * @protected
+   * @param {object} 
    */
-  _addToggleButton(div, { count, items }) {
-    let hidden = false;
-    if (count < 0) {
-      let totalCount = items.length;
-      if (totalCount > 0) {
-        const queue = [...items];
-        while (queue.length > 0) {
-          const { count: nestedCount, items: nestedItems } = queue.shift();
-          if (nestedCount > 0 && nestedItems.length > 0) {
-            totalCount += nestedItems.length;
-            queue.push(...nestedItems);
-          }
-        }
-      }
-      if (Math.abs(count) === totalCount) {
-        hidden = true;
-      }
-    }
+  _addToggleButton(div, hidden ) {
+    // let hidden = false;
+    // if (count < 0) {
+    //   let totalCount = items.length;
+    //   if (totalCount > 0) {
+    //     const queue = [...items];
+    //     while (queue.length > 0) {
+    //       const { count: nestedCount, items: nestedItems } = queue.shift();
+    //       if (nestedCount > 0 && nestedItems.length > 0) {
+    //         totalCount += nestedItems.length;
+    //         queue.push(...nestedItems);
+    //       }
+    //     }
+    //   }
+    //   if (Math.abs(count) === totalCount) {
+    //     hidden = true;
+    //   }
+    // }
     super._addToggleButton(div, hidden);
   }
 
@@ -218,25 +258,26 @@ class PDFOutlineViewer extends BaseTreeViewer {
     }
 
     const fragment = document.createDocumentFragment();
-    const queue = [{ parent: fragment, items: outline }];
+    const queue = [{ parent: fragment, items: outline.items }];
     let outlineCount = 0,
       hasAnyNesting = false;
     while (queue.length > 0) {
       const levelData = queue.shift();
+
       for (const item of levelData.items) {
         const div = document.createElement("div");
         div.className = "treeItem";
 
         const element = document.createElement("a");
         this._bindLink(element, item);
-        this._setStyles(element, item);
-        element.textContent = this._normalizeTextContent(item.title);
+        // this._setStyles(element, item);
+        element.textContent = item.title;//this._normalizeTextContent(item.title);
 
         div.append(element);
 
         if (item.items.length > 0) {
           hasAnyNesting = true;
-          this._addToggleButton(div, item);
+          this._addToggleButton(div, true);
 
           const itemsDiv = document.createElement("div");
           itemsDiv.className = "treeItems";
@@ -354,6 +395,15 @@ class PDFOutlineViewer extends BaseTreeViewer {
       pageNumberToDestHash.size > 0 ? pageNumberToDestHash : null
     );
     return this._pageNumberToDestHashCapability.promise;
+  }
+
+  async convert_OldOutline_to_newOutline(){
+    /**
+     * @type {OldPDFOutline|null}
+     */
+    const old_outline = await PDFViewerApplication.pdfDocument.getOutline()
+    const new_outline  = await PDFOutlineObject.from_oldOutline(PDFViewerApplication.pdf_info.uuid,old_outline);
+    return new_outline;
   }
 }
 

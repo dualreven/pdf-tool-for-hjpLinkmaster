@@ -1,4 +1,21 @@
-export function uint8ArrayToBase64(uint8Array) {
+import {PDFInfoObject} from "./types.js";
+
+
+/**
+ * Retrieves the PDF info object from the backend.
+ *
+ * @return {Promise<PDFInfoObject>} The PDF info object.
+ */
+async function get_PDFInfoObj(){
+    const json_string  = await window.backend.fetch_pdf_info();
+    const PDFInfoObj = new PDFInfoObject(JSON.parse(json_string));
+    return PDFInfoObj;
+}
+
+
+
+
+function uint8ArrayToBase64(uint8Array) {
     return new Promise((resolve, reject) => {
         // 创建一个 Blob 对象
         const blob = new Blob([uint8Array]);
@@ -18,8 +35,12 @@ export function uint8ArrayToBase64(uint8Array) {
     });
 }
 
-export function generate8CharUUID() {
-    return 'xxxxxxxx'.replace(/x/g, () => {
-        return (Math.random() * 16 | 0).toString(16);
-    });
+function generate8CharUUID() {
+    return Math.random().toString(36).substring(2, 10);
 }
+
+
+
+
+
+export {uint8ArrayToBase64,generate8CharUUID,get_PDFInfoObj}

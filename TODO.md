@@ -1,9 +1,18 @@
 # 当前
+- outline数据的读取
+- clips预留种类区分 
+- 转换后Outline数据的上传
 
-- 文件保存用uuid替代文件原名.
+
 
 # 待办
-- clip创建完成后应与后端通信
+- 删除原有的outline加载方式
+- 添加新的outline加载方式
+    - create_outline 函数
+- 后台配合outline数据的生成
+
+- clip创建完成后应与后端通信,回传clip数据
+- clip数据的读取
 - clip在page刷新时应保持相对位置不变
 - allRelatedCard按钮添加
 - reviewCard按钮添加
@@ -80,7 +89,19 @@
 - 实现复制PDFViewer为anklink的功能,打开就能回到上次阅读的位置.
 
 
-已完成
+# 已完成
+2024年8月18日15:20:09
+- 修改render函数中的相关outline树构建的代码.
+    - this._bindLink(element, item);
+    - this._setStyles(element, item);
+    - this._addToggleButton(div, item);
+    
+2024年8月17日17:14:47
+- outline数据的转换
+
+2024年8月16日14:18:54
+- 抽象python上的各种DataBase对象为一个ProtoDataBase
+
 2024年8月13日15:59:00
 - 解决keydown覆盖问题
 - 换CSS加载文件为本地文件
@@ -107,3 +128,6 @@
 - 实现封面图加载的机制
   - 1 实现pdfinfo加载封面图片
   - 2 实现当无封面图片时,需要用户先打开一次PDF,然后自动保存第一张图片
+
+# 放弃
+- 文件保存用uuid替代文件原名,文件的MD5值计算

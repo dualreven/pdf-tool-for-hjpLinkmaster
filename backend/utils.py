@@ -25,7 +25,7 @@ GREEN = "\033[32m"
 YELLOW = "\033[33m"
 BLUE = "\033[34m"
 RESET = "\033[0m"
-TYPE_PDF_UUID = TYPE_BOOK_NAME = TYPE_PDFCLIPS_UUID = str
+TYPE_PDF_UUID = TYPE_BOOK_NAME = TYPE_PDFCLIPS_UUID=TYPE_PDF_OUTLINE_UUID = str
 BACKEND_NAME = "backend"
 
 
@@ -94,6 +94,7 @@ PDF_file_path = (BASE_DIR / Path("./pdf_files/")).resolve()
 PDF_infofile_path = PDF_file_path / Path("pdf_info.json")
 clips_infofile_path = PDF_file_path / Path("pdfclips_info.json")
 clips_imgfile_path = PDF_file_path / Path("clips")
+outline_infofile_path = PDF_file_path / Path("outline_info.json")
 print(f"current_file={current_file}",f"BASE_DIR={BASE_DIR}")
 
 class templates:

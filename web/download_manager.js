@@ -16,7 +16,6 @@
 /** @typedef {import("./interfaces").IDownloadManager} IDownloadManager */
 
 import { createValidAbsoluteUrl, isPdfFile } from "pdfjs-lib";
-import {uint8ArrayToBase64} from "./func_tools.js"
 if (typeof PDFJSDev !== "undefined" && !PDFJSDev.test("CHROME || GENERIC")) {
   throw new Error(
     'Module "pdfjs-web/download_manager" shall not be used ' +
