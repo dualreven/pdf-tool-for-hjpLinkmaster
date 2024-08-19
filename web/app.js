@@ -1440,9 +1440,11 @@ const PDFViewerApplication = {
       // let outline;
       if (this.pdf_info.outline===""){
         this.pdfOutlineViewer.convert_OldOutline_to_newOutline().then(
-          new_outline=>{
-            this.pdfOutlineViewer.render({ new_outline, pdfDocument });
-            window.backend.upload_pdf_outline(JSON.stringify(new_outline.toDict()))
+          outline=>{
+            console.log("现在是新的outline时刻")
+            // window.backend.upload_pdf_outline(JSON.stringify(new_outline.toDict()))
+            // this.pdf_info.outline = new_outline.uuid
+            this.pdfOutlineViewer.render({ outline, pdfDocument });
           }
         )
       }

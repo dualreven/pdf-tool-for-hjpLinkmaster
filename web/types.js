@@ -71,7 +71,6 @@ class PDFInfoObject {
 
 
 
-import {generate8CharUUID} from "./"
 class PDFOutlineItem {
     constructor(title, page, items=[]) {
         this.title = title;
@@ -93,26 +92,27 @@ class PDFOutlineObject {
      * Represents a PDF outline.
      * @param {Object} params - The parameters for the outline.
      * @param {string} params.pdf_uuid - The UUID of the PDF.
-     * @param {string} [params.outline_uuid] - The UUID of the outline. Defaults to a generated UUID.
+     * @param {string} [params.uuid=null] - The UUID of the outline. Defaults to a generated UUID.
      * @param {PDFOutlineItem[]} [params.items=[]] - The list of outline items.
      * @param {number|null} [params.created_at=null] - The creation timestamp. Defaults to the current time.
      * @param {number|null} [params.updated_at=null] - The update timestamp. Defaults to the current time.
      * @param {number} [params.offSpring_count=0] - The count of offspring.
      */
-    constructor({pdf_uuid, outline_uuid=null, items=[], created_at=null, updated_at=null,offSpring_count=0}) {
-        this.pdfUuid = pdf_uuid;
-        this.outlineUuid = outline_uuid?outline_uuid:generate8CharUUID();
+    constructor({pdf_uuid, uuid=null, items=[], created_at=null, updated_at=null}) {
+        this.pdf_uuid = pdf_uuid;
+        this.uuid = uuid?uuid:generate8CharUUID();
         this.items = items;
-        this.createdAt = created_at?created_at:Date.now();
-        this.updatedAt = updated_at?updated_at:Date.now();
-        this.offSpring_count = offSpring_count
+        this.created_at = created_at?created_at:Date.now();
+        this.updated_at = updated_at?updated_at:Date.now();
     }
 
     toDict() {
         return {
-            pdf_uuid: this.pdfUuid,
-            uuid: this.outlineUuid,
-            items: this.items.map(item => item.toDict())
+            pdf_uuid: this.pdf_uuid,
+            uuid: this.uuid,
+            items: this.items.map(item => item.toDict()),
+            created_at:this.created_at,
+            updated_at:this.updated_at,
         };
     }
     /**
@@ -121,8 +121,8 @@ class PDFOutlineObject {
      * @param {OldPDFOutline} outline 
      * @returns {Promise<PDFOutlineObject>}
      */
-    static async from_oldOutline(pdfUuid,oldOutline) {
-        const newOutline = new PDFOutlineObject({pdfUuid});
+    static async from_oldOutline(pdf_uuid,oldOutline) {
+        const newOutline = new PDFOutlineObject({pdf_uuid});
         for(let i=0;i<oldOutline.length;i++) {
             const old_item = oldOutline[i];
             const new_item = await convertItem(old_item);

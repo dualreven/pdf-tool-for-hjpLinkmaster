@@ -63,8 +63,7 @@ class PDFViewerJsBridge(QObject):
         self.superior.upload_pdf_outline(data_str)
 
     @pyqtSlot(str, result=str)
-    def fetch_pdf_outline(self, pdf_uuid):
-        outline_uuid = self.superior.DB[pdf_uuid].outline
+    def fetch_pdf_outline(self, outline_uuid):
         return json.dumps(self.superior.outline_DB[outline_uuid].to_dict())
 
     @pyqtSlot(result=str)
@@ -80,8 +79,6 @@ class PDFViewer(ProtoWebWindowClass):
         self.outline_DB:PDFOutLineDataBase = PDFOutLineDataBase()
         super().__init__(templates.pdfViewer,PDFViewerJsBridge)
         self.setWindowTitle(f"PDF viewer of {self.DB[self.pdf_uuid].book_name}")
-
-
 
     def set_web(self, src: str):
         html_template = Template(open(src, "r", encoding="utf-8").read())
@@ -101,8 +98,9 @@ class PDFViewer(ProtoWebWindowClass):
     def upload_pdf_outline(self,jsonString:str):
         outline_dict = json.loads(jsonString)
         outline_obj = PDFOutlineObject(**outline_dict)
-        self.DB[self.pdf_uuid].outline = outline_obj.outline_uuid
-        self.outline_DB[outline_obj.outline_uuid] = outline_obj
+        self.DB[self.pdf_uuid].outline = outline_obj.uuid
+        self.outline_DB.set_data(outline_obj)
         self.outline_DB.save_database()
+        self.DB.save_database()
 
         pass

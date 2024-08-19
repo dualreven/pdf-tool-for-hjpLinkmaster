@@ -27,15 +27,23 @@ class ProtoDataBase:
             self._initialized = True
 
     def load_all_from_disk(self) -> dict:
-
+        need_rewrite = False
         if os.path.exists(self.infofile_path):
             f = open(self.infofile_path.resolve(), 'r', encoding='utf-8')
             file = f.read()
+            try:
+                pdf_info_dict = json.loads(file)
+            except:
+                pdf_info_dict = {}
+                need_rewrite = True
         else:
+            pdf_info_dict = {}
+            need_rewrite = True
+        if need_rewrite:
             with open(self.infofile_path.resolve(), 'w', encoding='utf-8') as f:
                 f.write("{}")
                 file = "{}"
-        pdf_info_dict = json.loads(file)
+
         return pdf_info_dict
 
     def __getitem__(self, key):

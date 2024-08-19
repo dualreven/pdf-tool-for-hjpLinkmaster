@@ -100,9 +100,9 @@ class PDFOutlineViewer extends BaseTreeViewer {
     this.eventBus._on("sidebarviewchanged", evt => {
       this._sidebarView = evt.view;
     });
-    if (!PDFViewerApplication.pdf_info.outline){
-      this.convert_OldOutline_to_newOutline();
-    }
+    // if (!PDFViewerApplication.pdf_info.outline){
+    //   this.convert_OldOutline_to_newOutline();
+    // }
 
 
   }
@@ -246,6 +246,7 @@ class PDFOutlineViewer extends BaseTreeViewer {
    * @param {PDFOutlineViewerRenderParameters} params
    */
   render({ outline, pdfDocument }) {
+    console.log("开始加载outline",outline,pdfDocument)
     if (this._outline) {
       this.reset();
     }
@@ -261,6 +262,7 @@ class PDFOutlineViewer extends BaseTreeViewer {
     const queue = [{ parent: fragment, items: outline.items }];
     let outlineCount = 0,
       hasAnyNesting = false;
+    console.log("outline_render 变量准备工作完成")
     while (queue.length > 0) {
       const levelData = queue.shift();
 
@@ -285,13 +287,16 @@ class PDFOutlineViewer extends BaseTreeViewer {
 
           queue.push({ parent: itemsDiv, items: item.items });
         }
-
+        
         levelData.parent.append(div);
         outlineCount++;
       }
     }
+    console.log("outline_render 循环工作完成")
 
     this._finishRendering(fragment, outlineCount, hasAnyNesting);
+    console.log("结束加载outline")
+
   }
 
   /**

@@ -11,10 +11,7 @@ class PDFOutlineItem:
         self.items:list[PDFOutlineItem] = [PDFOutlineItem(**item) for item in items]
 
     def to_dict(self):
-        d={}
-        d["title"]=self.title
-        d["page"]=self.page
-        d["items"]=[]
+        d= {"title": self.title, "page": self.page, "items": []}
         for child in self.items:
             d["items"].append(child.to_dict())
 
@@ -23,20 +20,17 @@ class PDFOutlineItem:
 @dataclasses.dataclass
 class PDFOutlineObject:
 
-    def __init__(self,pdf_uuid,outline_uuid,items,created_at,updated_at):
+    def __init__(self,pdf_uuid,uuid,items,created_at,updated_at):
         self.pdf_uuid:str = pdf_uuid
-        self.outline_uuid:str = outline_uuid
-        self.items:list[PDFOutlineItem] = items
+        self.uuid:str = uuid
+        self.items:list[PDFOutlineItem] = [PDFOutlineItem(**item) for item in items]
         self.created_at:int = created_at
         self.updated_at:int = updated_at
 
 
 
     def to_dict(self):
-        d={}
-        d["pdf_uuid"]=self.pdf_uuid
-        d["uuid"]=self.uuid
-        d["items"]=[]
+        d= {"pdf_uuid": self.pdf_uuid, "uuid": self.uuid, "created_at": self.created_at, "updated_at": self.updated_at, "items": []}
         for item in self.items:
             d["items"].append(item.to_dict())
         return d

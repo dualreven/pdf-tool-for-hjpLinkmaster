@@ -1,7 +1,5 @@
 # 当前
-- outline数据的读取
-- clips预留种类区分 
-- 转换后Outline数据的上传
+
 
 
 
@@ -90,6 +88,13 @@
 
 
 # 已完成
+2024年8月19日17:51:52
+- outline数据的读取
+- 转换后Outline数据的上传
+
+2024年8月18日15:24:54
+- clips预留种类区分 
+
 2024年8月18日15:20:09
 - 修改render函数中的相关outline树构建的代码.
     - this._bindLink(element, item);
