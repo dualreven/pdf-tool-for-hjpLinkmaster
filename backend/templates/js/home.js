@@ -87,10 +87,9 @@
  * @property {Elements} element - The elements configuration.
  */
 
+import {toast_info,register_toast_to_window} from "./notify_system.js"
 
-
-
-
+register_toast_to_window();
 const homeConfiguration= {
     element:
         {
@@ -112,7 +111,7 @@ const homeConfiguration= {
                         read: document.getElementById("pdf-table-action-read"),
                     }
             },
-            
+
         },
 
 
@@ -209,31 +208,6 @@ function create_pdf_table_row(pdf_info,rownum=0) {
  * @param {PDFInfoObject}pdf_info
  * @returns {string}
  */
-// function create_pdf_info_card(pdf_info) {
-// return `<div class="text-center">
-//     <img id="pdf-info-thumb" src="./test.jpg" class="card-img-top rounded" alt="" srcset="">
-//     </div>
-//     <div id="pdf-info-properties" class="card-body">
-//         <h5  id="pdf-info-title">${pdf_info.book_name}</h5 >
-//         <p  id="pdf-info-description">${pdf_info.comment}</p >
-//         <ul class="list-group list-group-flush">
-//             <li class="list-group-item" id="pdf-info-alias">alias:${pdf_info.alias}</li>
-//             <li class="list-group-item" id="pdf-info-pagenum">pagenum:${pdf_info.page_count}</li>
-//             <li class="list-group-item" id="pdf-info-clipsCount">
-//                 reading progress:
-//                 <div class="progress">
-//                 <div class="progress-bar" role="progressbar" style="width: ${Math.round(pdf_info.reading_progress)}%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-//                 </div>
-//             </li>
-//             <li class="list-group-item" id="pdf-info-clipsCount">clips count:${pdf_info.clips_count}</li>
-//             <li class="list-group-item" id="pdf-info-createdAt">createdAt:${pdf_info.created_at}</li>
-//             <li class="list-group-item" id="pdf-info-updatedAt">updatedAt:${pdf_info.updated_at}</li>
-//             <li class="list-group-item" id="pdf-info-readAt">readAt:${pdf_info.read_at}</li>
-//             <li class="list-group-item" id="pdf-info-stars">stars:${pdf_info.stars}</li>
-//             <li class="list-group-item" id="pdf-info-tags">tags:${pdf_info.tags}</li>
-//         </ul>
-//     </div>`;
-// }
 
 /**
  *
@@ -294,56 +268,6 @@ function get_table_selected_pdf_uuid(cfg) {
     console.log(table_selected.id);
 }
 
-// const right_side_op = {
-//     show_pdf_info: (cfg=window.homeConfiguration) => {
-//         cfg.element.rightSideContainer.classList.remove("display-none");
-//         cfg.element.pdfInfo.container.classList.remove("display-none");
-//     },
-//     hide_pdf_info: (cfg=window.homeConfiguration) => {
-//         cfg.element.rightSideContainer.classList.add("display-none");
-//         cfg.element.pdfInfo.container.classList.add("display-none");
-//         cfg.element.pdfClips.container.classList.add("display-none");
-//     },
-//     show_pdf_clips: (cfg=window.homeConfiguration) => {
-//         cfg.element.pdfClips.container.classList.remove("display-none");
-//     },
-//     /**
-//      * Hides the PDF clips.
-//      *
-//      * @param {HomeConfiguration} cfg - The configuration object. Defaults to window.homeConfiguration if not provided.
-//      */
-//     hide_pdf_clips: (cfg=window.homeConfiguration) => {
-//         cfg.element.pdfClips.container.classList.add("display-none");
-//     },
-//     hide_right_side: (cfg=window.homeConfiguration) => {
-//         cfg.element.rightSideContainer.classList.add("display-none");
-//         cfg.element.pdfInfo.container.classList.add("display-none");
-//         cfg.element.pdfClips.container.classList.add("display-none");
-//     }
-// }
-
-// function update_selected(table_selected,event){
-//     if(table_selected){
-//         table_selected.classList.remove("table-active");
-//         table_selected.classList.remove("table-row-selected")
-//     }
-//     let target = event.target;
-//     while (target && target.nodeName !== 'TR') {
-//         target = target.parentNode;
-//     }
-//     if (target && target == table_selected) {
-//         table_selected.classList.remove("table-active");
-//         table_selected.classList.remove("table-row-selected")
-//         table_selected=null;
-//     }
-//     else if (target && target.nodeName === 'TR') {
-//         target.classList.add("table-active");
-//         target.classList.add("table-row-selected");
-//         table_selected=target;
-//     }
-// }
-
-
 async function initHome() {
 
     const pdfList_str = await window.backend.fetch_pdf_list();
@@ -380,7 +304,7 @@ async function initHome() {
             target.classList.add("table-row-selected");
             table_selected=target;
         }
-        
+
         // console.log(event.target, table_selected);
     })
     cfg.element.pdfTable.viewer.body.addEventListener("dblclick",async (event)=>{
@@ -395,19 +319,7 @@ async function initHome() {
         if(target){
             window.backend.open_pdf_viewer(target.id);
         }
-        // if (target && target == table_selected) {
-        //     table_selected.classList.remove("table-active");
-        //     table_selected.classList.remove("table-row-selected")
-        //     table_selected=null;
-        // }
-        // else if (target && target.nodeName === 'TR') {
-        //     target.classList.add("table-active");
-        //     target.classList.add("table-row-selected");
-        //     table_selected=target;
-        // }
-        // if(table_selected){
-        //     window.backend.open_pdf_info(table_selected.id);
-        // }
+
     })
     cfg.element.pdfTable.button.import.addEventListener("click",async ()=>{
       /**
@@ -431,7 +343,7 @@ async function initHome() {
         if(table_selected){
             window.backend.open_pdf_info(table_selected.id);
         }
-        
+
     })
     cfg.element.pdfTable.button.delete.addEventListener("click",async ()=>{
         if(!table_selected){

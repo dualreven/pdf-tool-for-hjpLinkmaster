@@ -1441,9 +1441,8 @@ const PDFViewerApplication = {
       if (this.pdf_info.outline===""){
         this.pdfOutlineViewer.convert_OldOutline_to_newOutline().then(
           outline=>{
-            console.log("现在是新的outline时刻")
-            // window.backend.upload_pdf_outline(JSON.stringify(new_outline.toDict()))
-            // this.pdf_info.outline = new_outline.uuid
+            window.backend.upload_pdf_outline(JSON.stringify(outline.toDict()))
+            this.pdf_info.outline = outline.uuid
             this.pdfOutlineViewer.render({ outline, pdfDocument });
           }
         )
@@ -2406,6 +2405,8 @@ function webViewerResize() {
     pdfViewer.currentScaleValue = currentScaleValue;
   }
   pdfViewer.update();
+  // pdfViewer.eventBus.dispatch("after_resize")
+  // console.log("webViewerResize")
 }
 
 function webViewerHashchange(evt) {
@@ -2438,6 +2439,7 @@ if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
   var webViewerOpenFile = function (evt) {
     PDFViewerApplication._openFileInput?.click();
   };
+  
 }
 
 function webViewerPresentationMode() {
@@ -2562,6 +2564,7 @@ function webViewerScaleChanging(evt) {
   PDFViewerApplication.toolbar?.setPageScale(evt.presetValue, evt.scale);
 
   PDFViewerApplication.pdfViewer.update();
+  PDFViewerApplication.pdfViewer.eventBus.dispatch("page_refresh")
 }
 
 function webViewerRotationChanging(evt) {

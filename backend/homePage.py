@@ -117,6 +117,9 @@ class HomePageJsBridge(QObject):
     def close_window(self):
         self.superior.close()
 
+    def toast(self,msg,title="info",auto_close=True,toast_type=ToastType.INFO):
+        self.superior.page.runJavaScript(f"toast.{toast_type}('{title}','{msg}',auto_close={'true'if auto_close else 'false'});")
+
 
 class PDFReadingHome(ProtoWebWindowClass):
     def __init__(self):
@@ -137,6 +140,9 @@ class PDFReadingHome(ProtoWebWindowClass):
         pdfinfo = self.DB[pdf_uuid]
         if pdf_uuid not in self.opened_pdfViewer:
             self.opened_pdfViewer[pdf_uuid] = PDFViewerObj(pdfinfo.uuid,pdfinfo.book_name,viewer=PDFViewer(self,pdf_uuid))
+        else:
+            jsbridge:HomePageJsBridge = self.js_bridge
+            jsbridge.toast(f"the PDF viewer is already opened")
         self.opened_pdfViewer[pdf_uuid].viewer.show()
         self.opened_pdfViewer[pdf_uuid].viewer.activateWindow()
     pass
@@ -145,6 +151,9 @@ class PDFReadingHome(ProtoWebWindowClass):
         from .pdfInfoViewer import PDFInfoViewer
         if pdf_uuid not in self.opened_pdfInfoViewer:
             self.opened_pdfInfoViewer[pdf_uuid] = PDFInfoViewer(pdf_uuid, self)
+        else:
+            jsbridge: HomePageJsBridge = self.js_bridge
+            jsbridge.toast(f"the PDF info is already opened")
         self.opened_pdfInfoViewer[pdf_uuid].show()
         self.opened_pdfInfoViewer[pdf_uuid].activateWindow()
 
@@ -152,6 +161,9 @@ class PDFReadingHome(ProtoWebWindowClass):
         from .pdfClipsViewer import PdfClipsViewer
         if pdf_uuid not in self.opened_pdfClipsViewer:
             self.opened_pdfClipsViewer[pdf_uuid] = PdfClipsViewer(pdf_uuid, self)
+        else:
+            jsbridge: HomePageJsBridge = self.js_bridge
+            jsbridge.toast(f"the PDF clips is already opened")
         self.opened_pdfClipsViewer[pdf_uuid].show()
         self.opened_pdfClipsViewer[pdf_uuid].activateWindow()
 

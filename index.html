@@ -11,7 +11,9 @@
 <!-- <script src="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.min.js"></script> -->
     <link rel="resource" type="application/l10n" href="./web/locale/locale.json">
     $is_dev_env
-
+    
+    
+    
     <script type="importmap">
         {
           "imports": {
@@ -48,7 +50,7 @@
             "web-toolbar": "./web/toolbar.js"
           }
         }
-      </script>
+    </script>
 
     <script src="./backend/templates/js/qwebchannel.js"></script>
     <script>
@@ -77,6 +79,9 @@
             };
         }
     </script>
+    <link rel="stylesheet" href="./backend/templates/css/simple-notify.css">
+    <script type="module" src="./backend/templates/js/simple-notify.min.js"></script>
+
     <script type = 'module' defer src="./index.js"></script>
     <script type = 'module' defer>
         window.PDFNeedThumbnail = $checkPDFNeedThumbnail;

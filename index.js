@@ -1,5 +1,5 @@
 import { PDFViewerLoader, PDFViewerApplicationOptions,PDFViewerApplication,PDFViewerApplicationConstants } from "./web/viewer.js";
-import {toast_success,toast_info} from './web/notify_system.js'
+import {toast_success,toast_info, toast_error,register_toast_to_window} from './backend/templates/js/notify_system.js'
 import {init_inject} from "./web/initializer.js"
 import {CONSTANTS} from "./web/constants.js"
 toast_info("等待PDF初始化","")
@@ -28,6 +28,7 @@ function after_init_inject(){
       toast_success("pdf初始化成功","");
     })
   });
+  register_toast_to_window();
 }
 
 init_inject(after_init_inject)

@@ -162,7 +162,7 @@ class ClipSystem{
             }
             self.complete();
         })
-    
+        this.eventBus.on("page_refresh",()=>console.log("page_refresh"))
     }
     
     toggle(){

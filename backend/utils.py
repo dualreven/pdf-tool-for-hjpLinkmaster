@@ -61,6 +61,13 @@ def class_to_dict(cls):
 Returns:
     _type_: _description_
 """
+
+class ToastType:
+    SUCCESS = "success"
+    ERROR = "error"
+    WARNING = "warning"
+    INFO = "info"
+
 class EnumStatus:
     class Source:
         class Role:

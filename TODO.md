@@ -1,14 +1,11 @@
 # 当前
-
+- 搞明白page刷新的信号在哪里释放,然后尝试接入clip重绘
 
 
 
 # 待办
-- 删除原有的outline加载方式
-- 添加新的outline加载方式
-    - create_outline 函数
-- 后台配合outline数据的生成
-
+- outline修改的保存
+- outline右键.底部添加操作按钮(重命名,重定向,移动,删除,添加)
 - clip创建完成后应与后端通信,回传clip数据
 - clip数据的读取
 - clip在page刷新时应保持相对位置不变
@@ -88,9 +85,17 @@
 
 
 # 已完成
+2024年8月21日18:08:12
+- 新增一个小功能,从后端发toast到前端.
+
 2024年8月19日17:51:52
 - outline数据的读取
 - 转换后Outline数据的上传
+- 删除原有的outline加载方式
+- 添加新的outline加载方式
+    - create_outline 函数
+- 后台配合outline数据的生成
+
 
 2024年8月18日15:24:54
 - clips预留种类区分 

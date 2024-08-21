@@ -246,7 +246,6 @@ class PDFOutlineViewer extends BaseTreeViewer {
    * @param {PDFOutlineViewerRenderParameters} params
    */
   render({ outline, pdfDocument }) {
-    console.log("开始加载outline",outline,pdfDocument)
     if (this._outline) {
       this.reset();
     }
@@ -262,7 +261,6 @@ class PDFOutlineViewer extends BaseTreeViewer {
     const queue = [{ parent: fragment, items: outline.items }];
     let outlineCount = 0,
       hasAnyNesting = false;
-    console.log("outline_render 变量准备工作完成")
     while (queue.length > 0) {
       const levelData = queue.shift();
 
@@ -292,10 +290,8 @@ class PDFOutlineViewer extends BaseTreeViewer {
         outlineCount++;
       }
     }
-    console.log("outline_render 循环工作完成")
 
     this._finishRendering(fragment, outlineCount, hasAnyNesting);
-    console.log("结束加载outline")
 
   }
 
