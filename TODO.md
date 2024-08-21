@@ -1,5 +1,5 @@
 # 当前
-- 搞明白page刷新的信号在哪里释放,然后尝试接入clip重绘
+
 
 
 
@@ -85,6 +85,10 @@
 
 
 # 已完成
+2024年8月21日20:54:50
+- 搞明白page刷新的信号在哪里释放,然后尝试接入clip重绘
+    - 找到重绘的事件,还有page加载事件 setScaleUpdatePages
+    - this.eventBus.on("pagerendered",(data)=>console.log(data))
 2024年8月21日18:08:12
 - 新增一个小功能,从后端发toast到前端.
 

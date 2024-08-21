@@ -8,6 +8,8 @@ export const CONSTANTS={
       PDF_CREATE_CLIP_START:"pdf_start_create_clip",
       PDF_CREATE_CLIP_COMPLETED:"pdf_create_clip_completed",
       PDF_CREATE_CLIP_ABORT:"pdf_create_clip_failed",
+      PDF_PAGE_REFRESH:"pdf_page_refresh",
+      PDF_PAGE_CHANGED:"pdf_page_changed",
     },
     mouseButton:{
       LEFT:1,

@@ -162,7 +162,12 @@ class ClipSystem{
             }
             self.complete();
         })
-        this.eventBus.on("page_refresh",()=>console.log("page_refresh"))
+        // this.eventBus.on(CONSTANTS.eventName.PDF_PAGE_CHANGED,({pageNumber, pageLabel})=>console.log(pageNumber, pageLabel))
+        this.eventBus.on("pagerendered",(data)=>{
+            setTimeout(()=>{
+                self.redraw(data.pageNumber)
+            },100)
+        })
     }
     
     toggle(){
@@ -170,6 +175,16 @@ class ClipSystem{
             this.abort();
         }else{
             this.start();
+        }
+    }
+
+    redraw(pageNum){
+        console.log("redraw system",pageNum)
+        if (!this.#Clips[pageNum]){
+            return;
+        }
+        for(const clip of this.#Clips[pageNum]){
+            clip.redraw();
         }
     }
 
@@ -187,6 +202,14 @@ class ClipSystem{
     
     complete(){
         const clip = new ClipObject(this.mouseMoveInfo.start,this.mouseMoveInfo.end,this.mouseMoveInfo.pageNum,this.mouseMoveInfo.pageDiv);
+        // console.log(clip.to_dict())
+        if(this.#Clips[clip.pageNum]){
+            this.#Clips[clip.pageNum].push(clip);
+        }
+        else{
+            this.#Clips[clip.pageNum] = [clip]
+        }
+        
         this.#over()    
         this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_COMPLETED,{});
     }
@@ -238,11 +261,6 @@ class ClipObject{
     
     /** @type {Rect} */
     #percentRect
-    /** @type {number}*/
-    #pageNum
-    /** @type {string}*/
-    #uuid
-    #comment
     #created_at
     #edit_at
     /** @type {HTMLElement} */
@@ -250,19 +268,28 @@ class ClipObject{
 
 
     constructor(start,end,pageNum,parentElement,uuid=null,comment=null,created_at=null,edit_at=null){
+        this.create_div();
+        this.pageNum = pageNum
+        this.set_dom(parentElement);
+        this.set_rect(start,end);
+        this.uuid = uuid?uuid:generate8CharUUID()
+        this.comment = comment?comment:""
+        this.#created_at = created_at?created_at:Date.now()
+        this.#edit_at = edit_at?edit_at:Date.now()
+        
+    }
+    redraw(){
+        this.create_div();
+        // console.log(this.#parentElement);
+        this.set_dom(this.#parentElement);
+        this.#update_view();
+    }
+    create_div(){
         this.view = document.createElement("div");
         this.view.style.borderColor = "red";
         this.view.style.borderStyle = "dashed";
         this.view.style.borderWidth = "3px";
         this.view.style.position = "absolute";
-        this.#pageNum = pageNum
-        this.set_dom(parentElement);
-        this.set_rect(start,end);
-        this.#uuid = uuid?uuid:generate8CharUUID()
-        this.#comment = comment?comment:""
-        this.#created_at = created_at?created_at:Date.now()
-        this.#edit_at = edit_at?edit_at:Date.now()
-        
     }
         /**
      * Sets the start and end coordinates of the clip frame.
@@ -272,6 +299,7 @@ class ClipObject{
      * @return {void}
      */
     set_rect(start,end){
+        
         this.#percentRect = {
             left :  Math.min(start.x,end.x),
             top:    Math.min(start.y,end.y),
@@ -318,7 +346,7 @@ class ClipObject{
      *
      * @return {PDFClipInfoObject} An object containing the ClipObject's properties, including its UUID, page number, start and end coordinates, comment, creation and edit timestamps.
      */
-    get_info(){
+    to_dict(){
         const start = {
             x : this.#percentRect.left,
             y : this.#percentRect.top
@@ -329,11 +357,11 @@ class ClipObject{
         }
         return {
             pdf_uuid:null,
-            uuid : this.#uuid,
-            page_num : this.#pageNum,
+            uuid : this.uuid,
+            page_num : this.pageNum,
             start : [start.x,start.y],
             end : [end.x,end.y],
-            comment:this.#comment,
+            comment:this.comment,
             created_at:this.#created_at,
             edit_at:this.#edit_at
         }

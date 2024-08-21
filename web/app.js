@@ -2564,7 +2564,7 @@ function webViewerScaleChanging(evt) {
   PDFViewerApplication.toolbar?.setPageScale(evt.presetValue, evt.scale);
 
   PDFViewerApplication.pdfViewer.update();
-  PDFViewerApplication.pdfViewer.eventBus.dispatch("page_refresh")
+  PDFViewerApplication.pdfViewer.eventBus.dispatch(CONSTANTS.eventName.PDF_PAGE_REFRESH)
 }
 
 function webViewerRotationChanging(evt) {
@@ -2575,6 +2575,7 @@ function webViewerRotationChanging(evt) {
   PDFViewerApplication.forceRendering();
   // Ensure that the active page doesn't change during rotation.
   PDFViewerApplication.pdfViewer.currentPageNumber = evt.pageNumber;
+  PDFViewerApplication.pdfViewer.eventBus.dispatch(CONSTANTS.eventName.PDF_PAGE_REFRESH)
 }
 
 function webViewerPageChanging({ pageNumber, pageLabel }) {
@@ -2594,6 +2595,10 @@ function webViewerPageChanging({ pageNumber, pageLabel }) {
   PDFViewerApplication.toolbar?.updateLoadingIndicatorState(
     currentPage?.renderingState === RenderingStates.RUNNING
   );
+  PDFViewerApplication.pdfViewer.eventBus.dispatch(
+    CONSTANTS.eventName.PDF_PAGE_CHANGED,{pageNumber, pageLabel}
+  )
+
 }
 
 function webViewerResolutionChange(evt) {
