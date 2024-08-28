@@ -1,13 +1,22 @@
 # 当前
+- 新建一个按钮叫pick_clip
+- 点击pick_clip之后要发布一个事件,使得所有的clip_layer可以被点击
+- 修改从服务端获取clip的逻辑,考虑到将来clip数量众多,我们只按需获取加载的clip,因此需要clip上一级是页码,才能在需要加载的时候下载.
+- clip在创建完成的状态下,hover可高亮曾经选中的,并提前他的zindex
+
 
 
 
 
 # 待办
-- outline修改的保存
-- outline右键.底部添加操作按钮(重命名,重定向,移动,删除,添加)
+- clip的选择后添加一个工具条(复制链接|添加到当前(正面|背面)|添加到新增(正面|背面)|删除|添加评论)
+
+- 删除旋转功能
 - clip创建完成后应与后端通信,回传clip数据
 - clip数据的读取
+
+- outline修改的保存
+- outline右键.底部添加操作按钮(重命名,重定向,移动,删除,添加)
 - clip在page刷新时应保持相对位置不变
 - allRelatedCard按钮添加
 - reviewCard按钮添加
@@ -28,27 +37,6 @@
 - tooltip修改
     - 删除原有的tooltip,最好直接转换
     - 给按钮添加好用的toolTip
-- PDFViewer的书签功能修改
-    - 从数据库加载书签,不从本身加载,只在第一次打开书本的时候获取.
-        - 判断书籍是否发生过一次书签的获取
-    - 学习pdf_outline_viewer.js中的 render({ outline, pdfDocument }) 函数,理解如何获取正确的dest
-    - pdf_link_service.js中async goToDestination(dest) 函数的dest参数是如何获取的?
-    - PDFViewerApplication.pdfViewer.linkService.goToPage(1)
-    - PDFViewerApplication.pdfViewer.currentPageNumber
-
-    - 实现书签的添加和删除
-        - 修改书签的加载逻辑
-        - 新增书签的添加逻辑
-    - 怎样转换原有的大纲为给定的格式并保存
-        - 要把 destination 的参数转换为常人可看懂的
-        - const outline = await PDFViewerApplication.pdfDocument.getOutline()
-        - const [ref] = outline[0].dest
-        - const pagenum = await PDFViewerApplication.pdfDocument.getPageIndex(ref)+1
-
-
-
-
-
 
 
 - 挂靠卡片对象(LoadedCardObj)
@@ -85,6 +73,9 @@
 
 
 # 已完成
+2024年8月22日16:34:17
+- clip_layer的创建
+
 2024年8月21日20:54:50
 - 搞明白page刷新的信号在哪里释放,然后尝试接入clip重绘
     - 找到重绘的事件,还有page加载事件 setScaleUpdatePages
@@ -99,7 +90,22 @@
 - 添加新的outline加载方式
     - create_outline 函数
 - 后台配合outline数据的生成
+- PDFViewer的书签功能修改
+    - 从数据库加载书签,不从本身加载,只在第一次打开书本的时候获取.
+        - 判断书籍是否发生过一次书签的获取
+    - 学习pdf_outline_viewer.js中的 render({ outline, pdfDocument }) 函数,理解如何获取正确的dest
+    - pdf_link_service.js中async goToDestination(dest) 函数的dest参数是如何获取的?
+    - PDFViewerApplication.pdfViewer.linkService.goToPage(1)
+    - PDFViewerApplication.pdfViewer.currentPageNumber
 
+    - 实现书签的添加和删除
+        - 修改书签的加载逻辑
+        - 新增书签的添加逻辑
+    - 怎样转换原有的大纲为给定的格式并保存
+        - 要把 destination 的参数转换为常人可看懂的
+        - const outline = await PDFViewerApplication.pdfDocument.getOutline()
+        - const [ref] = outline[0].dest
+        - const pagenum = await PDFViewerApplication.pdfDocument.getPageIndex(ref)+1
 
 2024年8月18日15:24:54
 - clips预留种类区分 

@@ -7,7 +7,6 @@ __email__ = '564298339@qq.com'
 __time__ = '2024/7/30 13:35'
 """
 from PyQt6.QtGui import QCloseEvent
-
 from .pdfResourceHandler import *
 from .protoWindowClass import ProtoWebWindowClass
 

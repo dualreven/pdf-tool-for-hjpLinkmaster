@@ -39,8 +39,31 @@ function generate8CharUUID() {
     return Math.random().toString(36).substring(2, 10);
 }
 
+function createDiv(options) {
+    // 创建一个新的 div 元素
+    const div = document.createElement('div');
+  
+    // 如果 options 对象包含 id 属性，则设置 div 的 id
+    if (options.id) {
+      div.id = options.id;
+    }
+  
+    // 如果 options 对象包含 className 属性，则设置 div 的 class
+    if (options.className) {
+      div.className = options.className;
+    }
+  
+    // 如果 options 对象包含 cssStyles 属性，则设置 div 的内联样式
+    if (options.cssStyle) {
+      for (const style in options.cssStyle) {
+          div.style[style] = options.cssStyle[style];
+      }
+    }
+  
+    // 返回配置好的 div 元素
+    return div;
+}
 
 
 
-
-export {uint8ArrayToBase64,generate8CharUUID,get_PDFInfoObj}
+export {uint8ArrayToBase64,generate8CharUUID,get_PDFInfoObj,createDiv}

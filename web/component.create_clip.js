@@ -1,5 +1,6 @@
 import {CONSTANTS} from "./constants.js"
 import {generate8CharUUID} from "./func_tools.js"
+import {createDiv as create_div} from "./func_tools.js"
 /** @typedef {import("./event_utils.js").EventBus} EventBus */
 
 /**
@@ -68,8 +69,15 @@ function ensure_event_contains_class(eventTarget,className="page"){
 }
 
 class ClipSystem{
-    
+    /** 
+     * @type {HTMLElement}
+    */
+    #curr_page_element = null
 
+    /** 
+     * @type {HTMLElement}
+    */
+    #curr_clip_layer = null
     #opts   
     /**
      * @type {Object<number, ClipObject[]>} 
@@ -114,7 +122,7 @@ class ClipSystem{
                 self.abort();
             }
         });
-
+        // document.addEventListener("")
         document.addEventListener("mousedown", function(event) {
             if(!self.isStarted||event.buttons!==CONSTANTS.mouseButton.LEFT){
                 return;
@@ -124,6 +132,8 @@ class ClipSystem{
                 return;
             }
             const canvas = page_div.querySelector("canvas");
+            self.#curr_clip_layer = page_div.querySelector(".clip_layer");
+            self.#curr_clip_layer.classList.remove("clear_pointer_events")
             const rect = canvas.getBoundingClientRect();
             const x = (event.clientX - rect.left)/rect.width; // 鼠标相对于div的X坐标
             const y = (event.clientY - rect.top)/rect.height;  // 鼠标相对于div的Y坐标
@@ -148,6 +158,7 @@ class ClipSystem{
             if(!page_div){
                 return;
             }
+            
             const canvas = page_div.querySelector("canvas");
             const rect = canvas.getBoundingClientRect();
             const x = (event.clientX - rect.left)/rect.width; // 鼠标相对于div的X坐标
@@ -179,7 +190,12 @@ class ClipSystem{
     }
 
     redraw(pageNum){
-        console.log("redraw system",pageNum)
+        const page_el = document.querySelector(`div.page[data-page-number="${pageNum}"]`)
+        const clip_layer = page_el.querySelector(".clip_layer")
+        if(!clip_layer){
+            create_clipLayer(page_el);
+        }
+
         if (!this.#Clips[pageNum]){
             return;
         }
@@ -211,13 +227,15 @@ class ClipSystem{
         }
         
         this.#over()    
-        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_COMPLETED,{});
+        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_COMPLETED,{clip});
     }
 
     #over(){
         this.isStarted = false;
         this.toggleButton.classList.toggle("toggled",false);
         document.body.style.cursor = 'default';
+        this.#curr_clip_layer.classList?.add("clear_pointer_events")
+        this.#curr_clip_layer=null;
         this.#tempClip?.close();
         this.#tempClip = null;
         this.mouseMoveInfo = null;
@@ -265,14 +283,16 @@ class ClipObject{
     #edit_at
     /** @type {HTMLElement} */
     #parentElement
+    /** @type {HTMLElement} */
+    #clipLayerElement
 
 
     constructor(start,end,pageNum,parentElement,uuid=null,comment=null,created_at=null,edit_at=null){
-        this.create_div();
+        this.uuid = uuid?uuid:generate8CharUUID()
         this.pageNum = pageNum
+        this.create_div();
         this.set_dom(parentElement);
         this.set_rect(start,end);
-        this.uuid = uuid?uuid:generate8CharUUID()
         this.comment = comment?comment:""
         this.#created_at = created_at?created_at:Date.now()
         this.#edit_at = edit_at?edit_at:Date.now()
@@ -285,11 +305,27 @@ class ClipObject{
         this.#update_view();
     }
     create_div(){
-        this.view = document.createElement("div");
-        this.view.style.borderColor = "red";
-        this.view.style.borderStyle = "dashed";
-        this.view.style.borderWidth = "3px";
-        this.view.style.position = "absolute";
+        this.view = create_div({
+            className:"clip_item_container",
+            id:`clip-${this.uuid}`,
+            cssStyle:{
+                position:"absolute",
+                borderColor:"red",
+                borderStyle:"dashed",
+                borderWidth:"3px",
+            }
+        })
+        this.view.addEventListener("click",this.onClick.bind(this));
+
+        // this.view = document.createElement("div");
+        // this.view.style.borderColor = "red";
+        // this.view.style.borderStyle = "dashed";
+        // this.view.style.borderWidth = "3px";
+        // this.view.style.position = "absolute";
+    }
+    onClick(){
+        console.log(this.uuid,this.pageNum,"clicked")
+        
     }
         /**
      * Sets the start and end coordinates of the clip frame.
@@ -334,8 +370,17 @@ class ClipObject{
      * @return {void}
      */
     set_dom(parent_element){
+        const page_el = document.querySelector(`div.page[data-page-number="${this.pageNum}"]`)
+        const clip_layer = page_el.querySelector(".clip_layer")
         this.#parentElement = parent_element;
-        this.#parentElement.appendChild(this.view);
+        clip_layer.appendChild(this.view);
+        // if(clip_layer){
+        //     this.#clipLayerElement = clip_layer
+        // }
+        // else{
+        //     this.#clipLayerElement =create_clipLayer(this.#parentElement);
+        // }
+        // this.#clipLayerElement.appendChild(this.view);
     }
 
     close(){
@@ -367,6 +412,28 @@ class ClipObject{
         }
     }
 
+}
+
+/**
+ * 
+ * @param {HTMLElement} parentElement 
+ * @returns 
+ */
+function create_clipLayer(parentElement){
+    const clip_layer = create_div({
+        className:"clip_layer clear_pointer_events",
+        cssStyle:{
+            position:"absolute",
+            top:"0px",
+            left:"0px",
+            width:"100%",
+            height:"100%",
+        }
+    })
+    parentElement.appendChild(clip_layer)
+    // const canvas_layer = parentElement.querySelector(".canvasWrapper")
+    // canvas_layer.insertAdjacentElement("afterend",clip_layer);
+    return clip_layer
 }
 
 export {ClipSystem}
