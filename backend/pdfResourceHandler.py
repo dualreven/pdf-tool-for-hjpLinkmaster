@@ -54,8 +54,12 @@ class PDFInfoObject:
     tags: List[str] = dataclasses.field(default_factory=list)
     comment: str = ""
     thumbnail: str = ""
-    clips: list[str] = dataclasses.field(default_factory=list)  # list[PDFClipInfoObject.uuid]
-
+    clips: dict[int, list[str]] = dataclasses.field(default_factory=dict)
+    # def __post_init__(self):
+    #     if isinstance(self.clips, dict):
+    #         self.clips = {
+    #             int(pagenum): [PDFClipInfoObject(**clip) for clip in clips_list] for pagenum, clips_list in self.clips.items()
+    #         }
     def to_dict(self):
         return dataclasses.asdict(self)
 
@@ -227,3 +231,6 @@ class PDFInfoDataBase(ProtoDataBase):
 
 
 
+if __name__ == "__main__":
+
+    pass

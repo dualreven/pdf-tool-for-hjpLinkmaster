@@ -167,9 +167,7 @@ class PDFPageView {
     this.eventBus = options.eventBus;
     this.renderingQueue = options.renderingQueue;
     this.l10n = options.l10n;
-    if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
-      this.l10n ||= new GenericL10n();
-    }
+
 
     this.renderTask = null;
     this.resume = null;

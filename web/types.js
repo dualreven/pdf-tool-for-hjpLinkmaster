@@ -151,7 +151,14 @@ class PDFOutlineObject {
 
 async function convertItem(oldItem) {
     // 获取页码
-    const [ref] = oldItem.dest;
+    let ref;
+    if(typeof oldItem.dest === "string"){
+        [ref] = await window.PDFViewerApplication.pdfDocument.getDestination(oldItem.dest);
+    }
+    else{
+        [ref] = oldItem.dest;
+    }
+    // const [ref] = typeof oldItem.dest === "string" ? await window.PDFViewerApplication.pdfDocument.getDestination(oldItem.dest) : oldItem.dest;
     const page = await window.PDFViewerApplication.pdfDocument.getPageIndex(ref) + 1;
     const items = await Promise.all(oldItem.items.map(async (item) => await convertItem(item)))
 

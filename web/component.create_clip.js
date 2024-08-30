@@ -5,7 +5,8 @@ import {createDiv as create_div} from "./func_tools.js"
 
 /**
  * @typedef {Object} ClipSystemConstructorOptions
- * @property {HTMLButtonElement} toggleButton
+ * @property {HTMLButtonElement} imageClipCreationButton
+ * @property {HTMLButtonElement} clipOperationButton
  */
 
 /** @typedef {import("./types.js").Test} Test */
@@ -69,24 +70,12 @@ function ensure_event_contains_class(eventTarget,className="page"){
 }
 
 class ClipSystem{
-    /** 
-     * @type {HTMLElement}
-    */
-    #curr_page_element = null
 
-    /** 
-     * @type {HTMLElement}
-    */
-    #curr_clip_layer = null
     #opts   
     /**
      * @type {Object<number, ClipObject[]>} 
      */
     #Clips = {}
-    /**
-     * @type {tempClipObj|null}
-     */
-    #tempClip = null
     /**
      * Constructor for the AddBookMark class.
      *
@@ -101,7 +90,11 @@ class ClipSystem{
         this.mouseMoveInfo = null
         this.#opts = options;
         this.eventBus = eventBus;
-        this.toggleButton = options.toggleButton;
+        this.imageClipCreationButton = options.imageClipCreationButton;
+        this.clipOperationButton = options.clipOperationButton;
+        this.createImageClipSubsystem = new CreateImageClipSubSystem(this,options.imageClipCreationButton); 
+        this.clipSelectionSubsystem = new ClipOperationSubSystem(this,options.clipOperationButton);
+        
         this.init();
     }
 
@@ -109,86 +102,15 @@ class ClipSystem{
         this.#bindEvents();
     }
 
-    #bindEvents(){
-        this.toggleButton.addEventListener("click", this.toggle.bind(this));
-        let self = this;
-        window.addEventListener('keydown', function(event) {
-            if (event.altKey && event.key === 'c') {
-                self.start();
-            }
-            else if (event.key === 'Escape' && self.isStarted) {
-                // console.log('Escape key was pressed');
-                // 执行相应的操作
-                self.abort();
-            }
-        });
-        // document.addEventListener("")
-        document.addEventListener("mousedown", function(event) {
-            if(!self.isStarted||event.buttons!==CONSTANTS.mouseButton.LEFT){
-                return;
-            }
-            const page_div = ensure_event_contains_class(event.target)
-            if(!page_div){
-                return;
-            }
-            const canvas = page_div.querySelector("canvas");
-            self.#curr_clip_layer = page_div.querySelector(".clip_layer");
-            self.#curr_clip_layer.classList.remove("clear_pointer_events")
-            const rect = canvas.getBoundingClientRect();
-            const x = (event.clientX - rect.left)/rect.width; // 鼠标相对于div的X坐标
-            const y = (event.clientY - rect.top)/rect.height;  // 鼠标相对于div的Y坐标
-            const pageNum= parseInt(page_div.getAttribute("data-page-number"));
-            self.mouseMoveInfo = {
-                start:{x,y},
-                end:{x,y},
-                pageNum:pageNum,
-                pageDiv:page_div
-            }
-            self.#tempClip=new tempClipObj(self,self.mouseMoveInfo)
-            
-            console.log(self.mouseMoveInfo)
-            // console.log(x,y,curr_page,self);
-        })
-
-        document.addEventListener("mousemove", function(event) {
-            if(!self.mouseMoveInfo||!self.isStarted||event.buttons!==CONSTANTS.mouseButton.LEFT){
-                return;
-            }
-            const page_div = ensure_event_contains_class(event.target)
-            if(!page_div){
-                return;
-            }
-            
-            const canvas = page_div.querySelector("canvas");
-            const rect = canvas.getBoundingClientRect();
-            const x = (event.clientX - rect.left)/rect.width; // 鼠标相对于div的X坐标
-            const y = (event.clientY - rect.top)/rect.height;  // 鼠标相对于div的Y坐标
-            self.mouseMoveInfo.end = {x,y};
-            self.#tempClip.update(self.mouseMoveInfo);
-        })
-
-        document.addEventListener("mouseup", function(event) {
-            if(!self.#tempClip){
-                return ; 
-            }
-            self.complete();
-        })
-        // this.eventBus.on(CONSTANTS.eventName.PDF_PAGE_CHANGED,({pageNumber, pageLabel})=>console.log(pageNumber, pageLabel))
+    #bindEvents=()=>{
         this.eventBus.on("pagerendered",(data)=>{
             setTimeout(()=>{
-                self.redraw(data.pageNumber)
+                this.redraw(data.pageNumber)
             },100)
         })
     }
     
-    toggle(){
-        if(this.isStarted){
-            this.abort();
-        }else{
-            this.start();
-        }
-    }
-
+    
     redraw(pageNum){
         const page_el = document.querySelector(`div.page[data-page-number="${pageNum}"]`)
         const clip_layer = page_el.querySelector(".clip_layer")
@@ -204,47 +126,344 @@ class ClipSystem{
         }
     }
 
-    start(){
-        this.isStarted = true;
-        this.toggleButton.classList.toggle("toggled",true);
-        document.body.style.cursor = 'crosshair';
-        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_START,{});
+    /**
+     * Append a new clip object to the given page number.
+     * @param {ClipObject} clip
+     */
+    append_new_clip(clip){
+        if(!this.#Clips[clip.pageNum]){
+            this.#Clips[clip.pageNum] = [];
+        }
+        this.#Clips[clip.pageNum].push(clip);
+    }
+    /**
+     * Remove a clip object from the given page number.
+     * @param {number} pagenum
+     * @param {string} clip_uuid
+     */
+    remove_clip(pagenum,clip_uuid){
+        if(!this.#Clips[pagenum]){
+            return;
+        }
+        this.#Clips[clip.pageNum] = this.#Clips[clip.pageNum].filter(clip=>clip.uuid !== clip_uuid);
     }
 
-    abort(){
-        this.#over()
-        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_ABORT,{});
+    get_clip_info(pagenum,clip_uuid){
+        if(!this.#Clips[pagenum]){
+            return null;
+        }
+        for(const clip of this.#Clips[pagenum]){
+            if(clip.uuid === clip_uuid){
+                return clip;
+            }
+        }
+    }
+    /**
+     * Update the information of the given clip object in the given page number.
+     * @param {ClipObject} clip - The clip object to be updated.
+     */
+    update_clip_info(clip){
+        if(!this.#Clips[clip.pageNum]){
+            return;
+        }
+        for(let i=0;i<this.#Clips[clip.pageNum].length;i++){
+            if(this.#Clips[clip.pageNum][i].uuid === clip.uuid){
+                this.#Clips[clip.pageNum][i] = clip;
+                break;
+            }
+        }
+    }
+    build_clip_infoDB(){
+        throw new Error("Not Implemented");
+    }
+    save_clip_infoDB(){
+        throw new Error("Not Implemented");
+    }
+
+}
+
+class EventRegister{
+
+    constructor(self){
+        this.self=self
+    }
+}
+
+class SubSystem{
+    /** 
+     * @param {ClipSystem} superior 
+     * @param {HTMLElement} triggerBtn
+    */
+    constructor(superior,triggerBtn){
+        this.isStarted=false;
+        /** @type {ClipSystem} */
+        this.superior = superior;
+        /** @type {EventBus} */
+        this.eventBus = superior.eventBus;
+        /** @type {HTMLElement} */
+        this.triggerBtn = triggerBtn;
+        
+        this.init();
     }
     
-    complete(){
-        const clip = new ClipObject(this.mouseMoveInfo.start,this.mouseMoveInfo.end,this.mouseMoveInfo.pageNum,this.mouseMoveInfo.pageDiv);
-        // console.log(clip.to_dict())
-        if(this.#Clips[clip.pageNum]){
-            this.#Clips[clip.pageNum].push(clip);
-        }
-        else{
-            this.#Clips[clip.pageNum] = [clip]
-        }
-        
-        this.#over()    
-        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_COMPLETED,{clip});
+    init=()=>{
+        this.triggerBtn.addEventListener("click", this.toggle.bind(this));
+    }
+    
+    bindEvents(){
+        throw new Error("Not Implemented");
     }
 
-    #over(){
+    toggle(){
+        if(this.isStarted){
+            this.abort();
+        }else{
+            this.start();
+        }
+    }
+
+    start(){
+        this.isStarted = true;
+        this.triggerBtn.classList.toggle("toggled",true);
+    }
+    abort(){
+        this.over();
+    }
+    complete(){
+        throw new Error("Not Implemented");
+    }
+    over(){
         this.isStarted = false;
-        this.toggleButton.classList.toggle("toggled",false);
-        document.body.style.cursor = 'default';
-        this.#curr_clip_layer.classList?.add("clear_pointer_events")
+        this.triggerBtn.classList.toggle("toggled",false);
+    }
+}
+
+class CreateImageClipSubSystem extends SubSystem{
+    /** @type {HTMLElement|null} */
+    #curr_clip_layer = null
+    /** @type {tempClipObj|null} */
+    #tempClip = null
+    /** @type {MouseMoveInfo|null} */
+    mouseMoveInfo = null
+    viewer_container = document.querySelector("#viewer");
+    constructor(superior, triggerBtn) {
+        super(superior, triggerBtn);
+        // 如果需要，在这里添加额外的初始化代码
+        this.#bindEvents();
+    }
+
+    start(){
+        super.start();
+        this.mouseMoveInfo = null;
+        this.#curr_clip_layer = null;
+        this.#tempClip = null;
+        this.viewer_container.style.cursor = 'crosshair';
+        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_START,{});
+    }
+    abort(){
+        super.abort();
+        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_ABORT,{});
+    }
+    complete(){
+        const clip = new ClipObject(this.mouseMoveInfo.start,this.mouseMoveInfo.end,this.mouseMoveInfo.pageNum,this.mouseMoveInfo.pageDiv);
+        this.superior.append_new_clip(clip);
+        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_COMPLETED,{clip});
+        this.abort();
+    }
+
+    over(){
+        super.over();
+        this.viewer_container.style.cursor = 'default';
+        this.#curr_clip_layer?.classList.add("clear_pointer_events")
         this.#curr_clip_layer=null;
         this.#tempClip?.close();
         this.#tempClip = null;
         this.mouseMoveInfo = null;
-
     }
-    
+
+    #bindEvents=()=>{
+        // console.log(this);
+        window.addEventListener('keydown', this.#handle_keyDown);
+        window.addEventListener('mousedown', this.#handle_mouseDown);
+        window.addEventListener('mousemove', this.#handle_mouseMove);
+        window.addEventListener('mouseup', this.#handle_mouseUp);
+        this.eventBus.on(CONSTANTS.eventName.PDF_CLIP_OPERATION_START,this.abort.bind(this));
+    }
+    /**
+     * Handle keydown events. If the key is 'c' and 'alt' key is pressed, start the create clip system.
+     * If the key is 'Escape', abort the create clip system.
+     * @param {KeyboardEvent} event - The keydown event.
+     */
+    #handle_keyDown=(event)=>{
+        // console.log(this,event, event.key === 'Escape' ?true:false,self.isStarted?true:false);
+        if (!this.isStarted && event.altKey && event.key === 'c') {
+            this.start();
+            return ;
+        }
+        if (event.key === 'Escape' && this.isStarted) {
+            console.log("over")
+            this.abort();
+            return ;
+        }
+    }
+    /**
+     * @param {MouseEvent} event - The keydown event.
+     */
+    #handle_mouseDown=(event)=>{
+        let self = this;
+        if(self.isStarted&&event.buttons!==CONSTANTS.mouseButton.LEFT){
+            this.abort();
+            return;
+        }
+        if(!self.isStarted||event.buttons!==CONSTANTS.mouseButton.LEFT){
+            return;
+        }
+        const page_div = ensure_event_contains_class(event.target)
+        if(!page_div){
+            return;
+        }
+        const canvas = page_div.querySelector("canvas");
+        self.#curr_clip_layer = page_div.querySelector(".clip_layer");
+        self.#curr_clip_layer.classList.remove("clear_pointer_events")
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left)/rect.width; // 鼠标相对于div的X坐标
+        const y = (event.clientY - rect.top)/rect.height;  // 鼠标相对于div的Y坐标
+        const pageNum= parseInt(page_div.getAttribute("data-page-number"));
+        self.mouseMoveInfo = {
+            start:{x,y},
+            end:{x,y},
+            pageNum:pageNum,
+            pageDiv:page_div
+        }
+        self.#tempClip=new tempClipObj(self,self.mouseMoveInfo)
+        
+        // console.log(self.mouseMoveInfo)
+    }
+    /**
+     * @param {MouseEvent} event - The keydown event.
+     */
+    #handle_mouseMove=(event)=>{
+        let self = this;
+        if(!self.mouseMoveInfo||!self.isStarted||event.buttons!==CONSTANTS.mouseButton.LEFT){
+            return;
+        }
+        const page_div = ensure_event_contains_class(event.target)
+        if(!page_div){
+            return;
+        }
+
+        const canvas = page_div.querySelector("canvas");
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left)/rect.width; // 鼠标相对于div的X坐标
+        const y = (event.clientY - rect.top)/rect.height;  // 鼠标相对于div的Y坐标
+        self.mouseMoveInfo.end = {x,y};
+        self.#tempClip.update(self.mouseMoveInfo);
+    }
+    /**
+     * @param {MouseEvent} event - The keydown event.
+     */
+    #handle_mouseUp=(event)=>{
+        let self = this;
+        if(!self.#tempClip){
+            return ; 
+        }
+        self.complete();
+    }
 
 }
 
+class ClipOperationSubSystem extends SubSystem{
+    /**@type {number|null} */
+    current_page_num = null;
+    /**@type {Array<number>} */
+    page_selection_hisotry = [];
+    constructor(superior,triggerBtn){
+        super(superior,triggerBtn);
+        this.#bindEvents();
+    }
+    
+    complete(){}
+    #bindEvents=()=>{
+        this.eventBus.on(CONSTANTS.eventName.PDF_CREATE_CLIP_START,this.abort.bind(this));
+        window.addEventListener("mousemove",this.#handle_mouseMove);
+        window.addEventListener("keydown",this.#handle_keyDown);
+        window.addEventListener("mousedown",this.#handle_mouseDown);
+        
+    }
+    start(){
+        super.start();
+        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CLIP_OPERATION_START,{});
+    }
+    abort(){
+        super.abort();
+        this.disable_selection();
+        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CLIP_OPERATION_ABORTED,{});
+    }
+    over(){
+        super.over();
+        // console.log(this.page_selection_hisotry)
+        this.disable_selection();
+        // console.log("this.disable_selection");
+    }
+    #handle_keyDown=(event)=>{
+        if (event.key === 'Escape' && this.isStarted) {
+            this.abort();
+            return ;
+        }
+    }
+    #handle_mouseDown=(event)=>{
+        if(this.isStarted&&event.buttons!==CONSTANTS.mouseButton.LEFT){
+            this.abort();
+            return;
+        }
+    }
+    /**
+     * @param {MouseEvent} event - The keydown event.
+     */
+    #handle_mouseMove=(event)=>{
+        if (!this.isStarted){
+            return;
+        }
+        const page_div = ensure_event_contains_class(event.target)
+        if(!page_div){
+            return;
+        }
+        const pageNum= parseInt(page_div.getAttribute("data-page-number"));
+        if(pageNum!==this.current_page_num){
+            this.current_page_num = pageNum;
+            this.enable_selection(page_div);
+        }
+    }
+
+    /**
+     * Enables the page selection mode for the given page element.
+     * If the page is not already in the selection history, it will be added.
+     * @param {HTMLElement} page_element - The page element to enable selection mode for.
+     */
+    enable_selection(page_element){
+        if(!this.page_selection_hisotry.includes(this.current_page_num)){
+            const clip_layer = page_element.querySelector(".clip_layer");
+            if(clip_layer){
+                clip_layer.classList.remove("clear_pointer_events");
+                this.page_selection_hisotry.push(this.current_page_num);
+            }
+            
+        }
+    }
+
+    disable_selection(){
+        console.log("disable_selection",this.page_selection_hisotry)
+        this.page_selection_hisotry.forEach(page_num=>{
+            const container = document.querySelector(`div.page[data-page-number="${page_num}"]`)
+            const clip_layer = container.querySelector(".clip_layer");
+            console.log(container,clip_layer)
+            clip_layer?.classList.add("clear_pointer_events");
+        })
+        this.page_selection_hisotry = [];
+        this.current_page_num=null;
+    }
+
+}
 
 class tempClipObj{
 
@@ -257,7 +476,7 @@ class tempClipObj{
     constructor(system,mouseMoveInfo){
         this.system = system
         this.clipObj=new ClipObject(mouseMoveInfo.start,mouseMoveInfo.end,mouseMoveInfo.pageNum,mouseMoveInfo.pageDiv);
-        this.clipObj.view.style.borderColor = "green";
+        this.clipObj.view.element.style.borderColor = "green";
     }
     
     close(){
@@ -290,7 +509,7 @@ class ClipObject{
     constructor(start,end,pageNum,parentElement,uuid=null,comment=null,created_at=null,edit_at=null){
         this.uuid = uuid?uuid:generate8CharUUID()
         this.pageNum = pageNum
-        this.create_div();
+        this.view = new ClipObjectView(this,this.uuid);
         this.set_dom(parentElement);
         this.set_rect(start,end);
         this.comment = comment?comment:""
@@ -299,30 +518,24 @@ class ClipObject{
         
     }
     redraw(){
-        this.create_div();
-        // console.log(this.#parentElement);
+        this.view = new ClipObjectView(this,this.uuid);
         this.set_dom(this.#parentElement);
         this.#update_view();
     }
-    create_div(){
-        this.view = create_div({
-            className:"clip_item_container",
-            id:`clip-${this.uuid}`,
-            cssStyle:{
-                position:"absolute",
-                borderColor:"red",
-                borderStyle:"dashed",
-                borderWidth:"3px",
-            }
-        })
-        this.view.addEventListener("click",this.onClick.bind(this));
-
-        // this.view = document.createElement("div");
-        // this.view.style.borderColor = "red";
-        // this.view.style.borderStyle = "dashed";
-        // this.view.style.borderWidth = "3px";
-        // this.view.style.position = "absolute";
-    }
+    // create_div(){
+    //     this.view = create_div({
+    //         className:"clip_item_container",
+    //         id:`clip-${this.uuid}`,
+    //         cssStyle:{
+    //             position:"absolute",
+    //             borderColor:"red",
+    //             borderStyle:"dashed",
+    //             borderWidth:"3px",
+    //         }
+    //     })
+    //     this.view.addEventListener("click",this.onClick.bind(this));
+        
+    // }
     onClick(){
         console.log(this.uuid,this.pageNum,"clicked")
         
@@ -346,10 +559,12 @@ class ClipObject{
         this.#update_view();
     }
     #update_view(){
-        this.view.style.left = this.#percentRect.left*100 + "%";
-        this.view.style.top = this.#percentRect.top*100 + "%";
-        this.view.style.width = this.#percentRect.width*100 + "%";
-        this.view.style.height = this.#percentRect.height*100 + "%";
+        this.view.update_view({
+            left : this.#percentRect.left*100 + "%",
+            top : this.#percentRect.top*100 + "%",
+            width : this.#percentRect.width*100 + "%",
+            height : this.#percentRect.height*100 + "%",
+        })
     }
 
 
@@ -372,8 +587,8 @@ class ClipObject{
     set_dom(parent_element){
         const page_el = document.querySelector(`div.page[data-page-number="${this.pageNum}"]`)
         const clip_layer = page_el.querySelector(".clip_layer")
-        this.#parentElement = parent_element;
-        clip_layer.appendChild(this.view);
+        this.#parentElement = clip_layer;
+        this.view.set_parent(clip_layer);
         // if(clip_layer){
         //     this.#clipLayerElement = clip_layer
         // }
@@ -413,7 +628,87 @@ class ClipObject{
     }
 
 }
+class ClipObjectView{
+    
+    /** @type {boolean} */
+    isSelected=false
+    /**
+     * Constructor for ClipObjectView.
+     * @param {ClipObject} superior The superior ClipObject.
+     * @prop {boolean} is_selected Whether the clip is selected.
+     * @prop {HTMLDivElement} view The view element for the clip.
+     */
+    constructor(superior,uuid){
+        this.uuid = uuid;
+        this.superior = superior;
+        this.element = create_div({
+            className:"clip_item_container",
+            id:`clip-${this.uuid}`,
+        })
+        const self = this
+        this.element.addEventListener("mouseenter",(e)=>{
+            if(this.isSelected){
+                return;
+            }
+            this.element.classList.add("clip-hover");
+        })
+        this.element.addEventListener("mouseleave",(e)=>{
+            if(this.isSelected){
+                return;
+            }
+            this.element.classList.remove("clip-hover");
+        })
 
+        this.element.addEventListener("click",(e)=>{
+            if(this.isSelected){
+                return;
+            }
+            this.element.classList.add("clip-select");
+            this.isSelected=true;
+        })
+        
+        window.addEventListener("click",(e)=>{
+            if (!this.isSelected){
+                return;
+            }
+            const element = ensure_event_contains_class(e.target,"clip_item_container");
+            if(!element||element !== this.element){
+                this.isSelected=false;
+                return 
+            }
+        })
+
+    }
+    set_select(){
+        
+    }
+    set_unselect(){}
+
+    /**
+     * Update the position and size of the view based on the given parameters.
+     * 
+     * @param {Object} update_info - An object containing the left, top, width, and height of the view.
+     */
+    update_view({left,top,width,height}){
+        this.element.style.left =left;
+        this.element.style.top = top;
+        this.element.style.width = width;
+        this.element.style.height =height;
+    }
+
+    /**
+     * Sets the parent element of the ClipObjectView.
+     *
+     * @param {HTMLElement} p_el - The parent element to which the ClipObjectView will be appended.
+     * @return {void}
+     */
+    set_parent(p_el){
+        p_el.appendChild(this.element);
+    }
+    remove(){
+        this.element.remove();
+    }
+}
 /**
  * 
  * @param {HTMLElement} parentElement 

@@ -602,22 +602,22 @@ const PDFViewerApplication = {
       });
     }
 
-    if (appConfig.sidebar?.attachmentsView) {
-      this.pdfAttachmentViewer = new PDFAttachmentViewer({
-        container: appConfig.sidebar.attachmentsView,
-        eventBus,
-        l10n,
-        downloadManager,
-      });
-    }
+    // if (appConfig.sidebar?.attachmentsView) {
+    //   this.pdfAttachmentViewer = new PDFAttachmentViewer({
+    //     container: appConfig.sidebar.attachmentsView,
+    //     eventBus,
+    //     l10n,
+    //     downloadManager,
+    //   });
+    // }
 
-    if (appConfig.sidebar?.layersView) {
-      this.pdfLayerViewer = new PDFLayerViewer({
-        container: appConfig.sidebar.layersView,
-        eventBus,
-        l10n,
-      });
-    }
+    // if (appConfig.sidebar?.layersView) {
+    //   this.pdfLayerViewer = new PDFLayerViewer({
+    //     container: appConfig.sidebar.layersView,
+    //     eventBus,
+    //     l10n,
+    //   });
+    // }
 
     if (appConfig.sidebar) {
       this.pdfSidebar = new PDFSidebar({

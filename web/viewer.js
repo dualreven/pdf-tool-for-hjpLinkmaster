@@ -143,7 +143,8 @@ function getViewerConfiguration() {
       
     },
     clipSystem:{
-      toggleButton: document.getElementById("BtnCreateClip"),
+      imageClipCreationButton: document.getElementById("BtnCreateClip"),
+      clipOperationButton: document.getElementById("BtnPickClips"),
     },
     secondaryToolbar: {
       toolbar: document.getElementById("secondaryToolbar"),
@@ -185,10 +186,10 @@ function getViewerConfiguration() {
       // Views
       thumbnailView: document.getElementById("thumbnailView"),
       outlineView: document.getElementById("outlineView"),
-      attachmentsView: document.getElementById("attachmentsView"),
-      layersView: document.getElementById("layersView"),
+      // attachmentsView: document.getElementById("attachmentsView"),
+      // layersView: document.getElementById("layersView"),
       // View-specific options
-      currentOutlineItemButton: document.getElementById("currentOutlineItem"),
+      // currentOutlineItemButton: document.getElementById("currentOutlineItem"),
     },
     findBar: {
       bar: document.getElementById("findbar"),

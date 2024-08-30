@@ -100,15 +100,15 @@ class PDFSidebar {
 
     this.thumbnailButton = elements.thumbnailButton;
     this.outlineButton = elements.outlineButton;
-    this.attachmentsButton = elements.attachmentsButton;
-    this.layersButton = elements.layersButton;
+    // this.attachmentsButton = elements.attachmentsButton;
+    // this.layersButton = elements.layersButton;
 
     this.thumbnailView = elements.thumbnailView;
     this.outlineView = elements.outlineView;
-    this.attachmentsView = elements.attachmentsView;
-    this.layersView = elements.layersView;
+    // this.attachmentsView = elements.attachmentsView;
+    // this.layersView = elements.layersView;
 
-    this._currentOutlineItemButton = elements.currentOutlineItemButton;
+    // this._currentOutlineItemButton = elements.currentOutlineItemButton;
 
     this.eventBus = eventBus;
 
@@ -124,9 +124,9 @@ class PDFSidebar {
     this.switchView(SidebarView.THUMBS);
 
     this.outlineButton.disabled = false;
-    this.attachmentsButton.disabled = false;
-    this.layersButton.disabled = false;
-    this._currentOutlineItemButton.disabled = true;
+    // this.attachmentsButton.disabled = false;
+    // this.layersButton.disabled = false;
+    // this._currentOutlineItemButton.disabled = true;
   }
 
   /**
@@ -187,16 +187,16 @@ class PDFSidebar {
           return;
         }
         break;
-      case SidebarView.ATTACHMENTS:
-        if (this.attachmentsButton.disabled) {
-          return;
-        }
-        break;
-      case SidebarView.LAYERS:
-        if (this.layersButton.disabled) {
-          return;
-        }
-        break;
+      // case SidebarView.ATTACHMENTS:
+      //   if (this.attachmentsButton.disabled) {
+      //     return;
+      //   }
+      //   break;
+      // case SidebarView.LAYERS:
+      //   if (this.layersButton.disabled) {
+      //     return;
+      //   }
+      //   break;
       default:
         console.error(`PDFSidebar.switchView: "${view}" is not a valid view.`);
         return;
@@ -216,16 +216,16 @@ class PDFSidebar {
       view === SidebarView.OUTLINE,
       this.outlineView
     );
-    toggleCheckedBtn(
-      this.attachmentsButton,
-      view === SidebarView.ATTACHMENTS,
-      this.attachmentsView
-    );
-    toggleCheckedBtn(
-      this.layersButton,
-      view === SidebarView.LAYERS,
-      this.layersView
-    );
+    // toggleCheckedBtn(
+    //   this.attachmentsButton,
+    //   view === SidebarView.ATTACHMENTS,
+    //   this.attachmentsView
+    // );
+    // toggleCheckedBtn(
+    //   this.layersButton,
+    //   view === SidebarView.LAYERS,
+    //   this.layersView
+    // );
 
     if (forceOpen && !this.isOpen) {
       this.open();
@@ -349,21 +349,21 @@ class PDFSidebar {
       this.eventBus.dispatch("toggleoutlinetree", { source: this });
     });
 
-    this.attachmentsButton.addEventListener("click", () => {
-      this.switchView(SidebarView.ATTACHMENTS);
-    });
+    // this.attachmentsButton.addEventListener("click", () => {
+    //   this.switchView(SidebarView.ATTACHMENTS);
+    // });
 
-    this.layersButton.addEventListener("click", () => {
-      this.switchView(SidebarView.LAYERS);
-    });
-    this.layersButton.addEventListener("dblclick", () => {
-      this.eventBus.dispatch("resetlayers", { source: this });
-    });
+    // this.layersButton.addEventListener("click", () => {
+    //   this.switchView(SidebarView.LAYERS);
+    // });
+    // this.layersButton.addEventListener("dblclick", () => {
+    //   this.eventBus.dispatch("resetlayers", { source: this });
+    // });
 
     // Buttons for view-specific options.
-    this._currentOutlineItemButton.addEventListener("click", () => {
-      this.eventBus.dispatch("currentoutlineitem", { source: this });
-    });
+    // this._currentOutlineItemButton.addEventListener("click", () => {
+    //   this.eventBus.dispatch("currentoutlineitem", { source: this });
+    // });
 
     // Disable/enable views.
     const onTreeLoaded = (count, button, view) => {
@@ -381,25 +381,25 @@ class PDFSidebar {
     this.eventBus._on("outlineloaded", evt => {
       onTreeLoaded(evt.outlineCount, this.outlineButton, SidebarView.OUTLINE);
 
-      evt.currentOutlineItemPromise.then(enabled => {
-        if (!this.isInitialViewSet) {
-          return;
-        }
-        this._currentOutlineItemButton.disabled = !enabled;
-      });
+      // evt.currentOutlineItemPromise.then(enabled => {
+      //   if (!this.isInitialViewSet) {
+      //     return;
+      //   }
+      //   this._currentOutlineItemButton.disabled = !enabled;
+      // });
     });
 
-    this.eventBus._on("attachmentsloaded", evt => {
-      onTreeLoaded(
-        evt.attachmentsCount,
-        this.attachmentsButton,
-        SidebarView.ATTACHMENTS
-      );
-    });
+    // this.eventBus._on("attachmentsloaded", evt => {
+    //   onTreeLoaded(
+    //     evt.attachmentsCount,
+    //     this.attachmentsButton,
+    //     SidebarView.ATTACHMENTS
+    //   );
+    // });
 
-    this.eventBus._on("layersloaded", evt => {
-      onTreeLoaded(evt.layersCount, this.layersButton, SidebarView.LAYERS);
-    });
+    // this.eventBus._on("layersloaded", evt => {
+    //   onTreeLoaded(evt.layersCount, this.layersButton, SidebarView.LAYERS);
+    // });
 
     // Update the thumbnailViewer, if visible, when exiting presentation mode.
     this.eventBus._on("presentationmodechanged", evt => {

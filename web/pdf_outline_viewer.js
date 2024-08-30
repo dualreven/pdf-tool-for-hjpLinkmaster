@@ -80,10 +80,10 @@ class PDFOutlineViewer extends BaseTreeViewer {
     this.downloadManager = options.downloadManager;
 
     this.eventBus._on("toggleoutlinetree", this._toggleAllTreeItems.bind(this));
-    this.eventBus._on(
-      "currentoutlineitem",
-      this._currentOutlineItem.bind(this)
-    );
+    // this.eventBus._on(
+    //   "currentoutlineitem",
+    //   this._currentOutlineItem.bind(this)
+    // );
 
     this.eventBus._on("pagechanging", evt => {
       this._currentPageNumber = evt.pageNumber;
