@@ -1,6 +1,7 @@
 import {CONSTANTS} from "./constants.js"
 import {generate8CharUUID} from "./func_tools.js"
 import {createDiv as create_div} from "./func_tools.js"
+
 /** @typedef {import("./event_utils.js").EventBus} EventBus */
 
 /**
@@ -258,16 +259,19 @@ class CreateImageClipSubSystem extends SubSystem{
         this.#curr_clip_layer = null;
         this.#tempClip = null;
         this.viewer_container.style.cursor = 'crosshair';
-        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_START,{});
+        this.eventBus.dispatch(CONSTANTS.eventName.SOME_MONO_MODE_START,{
+            signal:CONSTANTS.eventName.PDF_CREATE_IMGCLIP_START
+        });
+        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_IMGCLIP_START,{});
     }
     abort(){
         super.abort();
-        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_ABORT,{});
+        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_IMGCLIP_ABORT,{});
     }
     complete(){
         const clip = new ClipObject(this.mouseMoveInfo.start,this.mouseMoveInfo.end,this.mouseMoveInfo.pageNum,this.mouseMoveInfo.pageDiv);
         this.superior.append_new_clip(clip);
-        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_CLIP_COMPLETED,{clip});
+        this.eventBus.dispatch(CONSTANTS.eventName.PDF_CREATE_IMGCLIP_COMPLETED,{clip});
         this.abort();
     }
 
@@ -282,12 +286,15 @@ class CreateImageClipSubSystem extends SubSystem{
     }
 
     #bindEvents=()=>{
-        // console.log(this);
         window.addEventListener('keydown', this.#handle_keyDown);
         window.addEventListener('mousedown', this.#handle_mouseDown);
         window.addEventListener('mousemove', this.#handle_mouseMove);
         window.addEventListener('mouseup', this.#handle_mouseUp);
-        this.eventBus.on(CONSTANTS.eventName.PDF_CLIP_OPERATION_START,this.abort.bind(this));
+        this.eventBus.on(CONSTANTS.eventName.SOME_MONO_MODE_START,(e)=>{
+            if(e.signal !==CONSTANTS.eventName.PDF_CREATE_IMGCLIP_START && this.isStarted){
+                this.abort();
+            }
+        });
     }
     /**
      * Handle keydown events. If the key is 'c' and 'alt' key is pressed, start the create clip system.
@@ -295,13 +302,11 @@ class CreateImageClipSubSystem extends SubSystem{
      * @param {KeyboardEvent} event - The keydown event.
      */
     #handle_keyDown=(event)=>{
-        // console.log(this,event, event.key === 'Escape' ?true:false,self.isStarted?true:false);
         if (!this.isStarted && event.altKey && event.key === 'c') {
             this.start();
             return ;
         }
         if (event.key === 'Escape' && this.isStarted) {
-            console.log("over")
             this.abort();
             return ;
         }
@@ -337,7 +342,6 @@ class CreateImageClipSubSystem extends SubSystem{
         }
         self.#tempClip=new tempClipObj(self,self.mouseMoveInfo)
         
-        // console.log(self.mouseMoveInfo)
     }
     /**
      * @param {MouseEvent} event - The keydown event.
@@ -384,7 +388,11 @@ class ClipOperationSubSystem extends SubSystem{
     
     complete(){}
     #bindEvents=()=>{
-        this.eventBus.on(CONSTANTS.eventName.PDF_CREATE_CLIP_START,this.abort.bind(this));
+        this.eventBus.on(CONSTANTS.eventName.SOME_MONO_MODE_START,(e)=>{
+            if(e.signal !==CONSTANTS.eventName.PDF_CLIP_OPERATION_START && this.isStarted){
+                this.abort();
+            }
+        });
         window.addEventListener("mousemove",this.#handle_mouseMove);
         window.addEventListener("keydown",this.#handle_keyDown);
         window.addEventListener("mousedown",this.#handle_mouseDown);
@@ -392,6 +400,9 @@ class ClipOperationSubSystem extends SubSystem{
     }
     start(){
         super.start();
+        this.eventBus.dispatch(CONSTANTS.eventName.SOME_MONO_MODE_START,{
+            signal:CONSTANTS.eventName.PDF_CLIP_OPERATION_START
+        });
         this.eventBus.dispatch(CONSTANTS.eventName.PDF_CLIP_OPERATION_START,{});
     }
     abort(){
@@ -401,9 +412,7 @@ class ClipOperationSubSystem extends SubSystem{
     }
     over(){
         super.over();
-        // console.log(this.page_selection_hisotry)
         this.disable_selection();
-        // console.log("this.disable_selection");
     }
     #handle_keyDown=(event)=>{
         if (event.key === 'Escape' && this.isStarted) {
@@ -452,11 +461,9 @@ class ClipOperationSubSystem extends SubSystem{
     }
 
     disable_selection(){
-        console.log("disable_selection",this.page_selection_hisotry)
         this.page_selection_hisotry.forEach(page_num=>{
             const container = document.querySelector(`div.page[data-page-number="${page_num}"]`)
             const clip_layer = container.querySelector(".clip_layer");
-            console.log(container,clip_layer)
             clip_layer?.classList.add("clear_pointer_events");
         })
         this.page_selection_hisotry = [];
@@ -522,25 +529,7 @@ class ClipObject{
         this.set_dom(this.#parentElement);
         this.#update_view();
     }
-    // create_div(){
-    //     this.view = create_div({
-    //         className:"clip_item_container",
-    //         id:`clip-${this.uuid}`,
-    //         cssStyle:{
-    //             position:"absolute",
-    //             borderColor:"red",
-    //             borderStyle:"dashed",
-    //             borderWidth:"3px",
-    //         }
-    //     })
-    //     this.view.addEventListener("click",this.onClick.bind(this));
-        
-    // }
-    onClick(){
-        console.log(this.uuid,this.pageNum,"clicked")
-        
-    }
-        /**
+    /**
      * Sets the start and end coordinates of the clip frame.
      *
      * @param {POS} start - The start coordinates with x and y properties.
@@ -585,8 +574,8 @@ class ClipObject{
      * @return {void}
      */
     set_dom(parent_element){
-        const page_el = document.querySelector(`div.page[data-page-number="${this.pageNum}"]`)
-        const clip_layer = page_el.querySelector(".clip_layer")
+        const page_el = document.querySelector(`div.page[data-page-number="${this.pageNum}"]`);
+        const clip_layer = page_el.querySelector(".clip_layer");
         this.#parentElement = clip_layer;
         this.view.set_parent(clip_layer);
         // if(clip_layer){
@@ -632,6 +621,10 @@ class ClipObjectView{
     
     /** @type {boolean} */
     isSelected=false
+    /** @type {HTMLDivElement|null} */
+    parent_container = null
+    /** @type {Size|null} */
+    parent_size = null
     /**
      * Constructor for ClipObjectView.
      * @param {ClipObject} superior The superior ClipObject.
@@ -663,8 +656,7 @@ class ClipObjectView{
             if(this.isSelected){
                 return;
             }
-            this.element.classList.add("clip-select");
-            this.isSelected=true;
+            this.set_select();
         })
         
         window.addEventListener("click",(e)=>{
@@ -672,17 +664,42 @@ class ClipObjectView{
                 return;
             }
             const element = ensure_event_contains_class(e.target,"clip_item_container");
-            if(!element||element !== this.element){
-                this.isSelected=false;
+            if(!element||element.id !== this.element.id){
+                this.set_unselect();
                 return 
             }
         })
 
     }
+
+    dragMoveListener(event) {
+        const target = event.target;
+        const x_percent = parseFloat(target.style.left) || 0;
+        const y_percent = parseFloat(target.style.top) || 0;
+        const x_new = x_percent + event.dx/this.parent_size.width * 100;
+        const y_new = y_percent + event.dy/this.parent_size.height * 100;
+        // const a = { x_percent, y_percent, W, H, x_real, y_real, x_new, y_new };
+        // console.log(a);
+
+        target.style.left = `${x_new}%`;
+        target.style.top = `${y_new}%`;
+      }
+
+      resizeMoveListener(event) {
+        const target = event.target;
+        target.style.width = `${(event.rect.width / this.parent_size.width) * 100}%`;
+        target.style.height = `${(event.rect.height /this.parent_size.height) * 100}%`;
+      }
+
     set_select(){
-        
+        this.element.classList.remove("clip-hover");
+        this.element.classList.add("clip-selected");
+        this.isSelected=true;
     }
-    set_unselect(){}
+    set_unselect(){
+        this.element.classList.remove("clip-selected");
+        this.isSelected=false;
+    }
 
     /**
      * Update the position and size of the view based on the given parameters.
@@ -703,12 +720,60 @@ class ClipObjectView{
      * @return {void}
      */
     set_parent(p_el){
-        p_el.appendChild(this.element);
+        this.parent_container = p_el;
+        this.parent_container.appendChild(this.element);
+        const rect = this.parent_container.getBoundingClientRect();
+        this.parent_size = {
+            width : rect.width,
+            height : rect.height
+        }
+        this.set_draggable_resizable(p_el);
     }
     remove(){
         this.element.remove();
     }
+    set_draggable_resizable(){
+        
+        interact(this.element)
+          .draggable({
+            // inertia: true,
+            modifiers: [
+              interact.modifiers.restrictRect({
+                restriction: "parent",
+                // endOnly: true,
+              }),
+            ],
+            autoScroll: true,
+            listeners: {
+              move: this.dragMoveListener.bind(this),
+            },
+          })
+          .resizable({
+            edges: { bottom: true, right: true },
+            listeners: {
+              move: this.resizeMoveListener.bind(this),
+            },
+            modifiers: [
+              interact.modifiers.restrictEdges({
+                outer: "parent",
+                // endOnly: true,
+              }),
+              interact.modifiers.restrictSize({
+                min: { width: 50, height: 50 },
+                //   max: { width: 300, height: 300 },
+              }),
+            ],
+            // inertia: true,
+          });
+    }
 }
+class ClipToolBar{
+
+}
+class ClipToolBarView{
+
+}
+
 /**
  * 
  * @param {HTMLElement} parentElement 
@@ -730,5 +795,5 @@ function create_clipLayer(parentElement){
     // canvas_layer.insertAdjacentElement("afterend",clip_layer);
     return clip_layer
 }
-
+// console.log(interact)
 export {ClipSystem}

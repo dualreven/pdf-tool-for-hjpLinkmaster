@@ -1,3 +1,4 @@
+import { CONSTANTS } from "./constants.js";
 import {toggleExpandedBtn} from "./ui_utils.js"
 
 /**
@@ -43,6 +44,11 @@ class AddBookMark{
         this.toggleButton.addEventListener("click", this.toggleContainer.bind(this));
         this.cancelButton.addEventListener("click", this.close.bind(this));
         this.submitButton.addEventListener("click", this.submit.bind(this));
+        this.eventBus.on(CONSTANTS.eventName.SOME_MONO_MODE_START,(e)=>{
+            if(e.signal!==CONSTANTS.eventName.PDF_ADD_BOOKMARK_START && this.opened){
+                this.close();
+            }
+        })
     }
 
     toggleContainer(){
@@ -58,6 +64,9 @@ class AddBookMark{
         this.userInput.value = "";
         this.parentList.selectedIndex = 0;
         this.opened = true;
+        this.eventBus.dispatch(CONSTANTS.eventName.SOME_MONO_MODE_START,{
+            signal:CONSTANTS.eventName.PDF_ADD_BOOKMARK_START
+        })
     }
 
     close(){

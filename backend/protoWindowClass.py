@@ -35,7 +35,7 @@ class ProtoWebWindowClass(QMainWindow):
         self.js_bridge = js_bridge(self)
         self.channel.registerObject(BACKEND_NAME, self.js_bridge)
         self.browser.page().setWebChannel(self.channel)
-        # self.dev_tools.hide()
+        self.dev_tools.hide()
 
     # @abc.abstractmethod
     def set_web(self, src: str):

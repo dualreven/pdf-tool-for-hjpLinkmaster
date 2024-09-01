@@ -2,26 +2,17 @@
 
 - https://github.com/mar10/fancytree/wiki 学习这个用法 https://poe.com/chat/3jo4e13rqqubov30wx1
 
-- 学习常规的 [pdf跳转](obsidian://open?vault=%E6%97%A5%E8%AE%B0%E7%BB%9F%E8%AE%A1&file=%E6%80%9D%E8%80%83%2F%E6%9C%AA%E5%91%BD%E5%90%8D)
+- 学习常规的 [pdf跳转](obsidian://open?vault=%E6%97%A5%E8%AE%B0%E7%BB%9F%E8%AE%A1&file=%E6%80%9D%E8%80%83%2F%E6%9C%AA%E5%91%BD%E5%90%8D) 并实现.
 
 
 - 修改从服务端获取clip的逻辑,考虑到将来clip数量众多,我们只按需获取加载的clip,因此还需要修改clip的数据结构上一级是页码,才能在需要加载的时候下载.
-
-- create clip的时候,超出边界应该修正
-
-  
-  
-  
-
-# 待办
+- clip的选择后添加一个工具条(复制链接|添加到当前(正面|背面)|添加到新增(正面|背面)|删除|添加评论)
 
 - clip在创建完成的状态下,hover可高亮曾经选中的,并提前他的zindex
 
   
 
-- clip的选择后添加一个工具条(复制链接|添加到当前(正面|背面)|添加到新增(正面|背面)|删除|添加评论)
-
-  
+# 待办
 
 - 删除旋转功能
 
@@ -29,7 +20,7 @@
 
 - clip数据的读取
 
-  
+- outline用现有组件重写fancyTree实现复杂交互.  
 
 - outline修改的保存
 
@@ -138,6 +129,13 @@
   
 
 # 已完成
+2024年8月31日23:49:27
+- create clip的时候,超出边界应该修正
+- clip 拖动特效
+    - 学习使用interact.js
+2024年8月30日21:51:46
+- 添加clip操作时的选中特效
+
 2024年8月30日21:00:31
 - 点击pick_clip之后要发布一个事件,使得所有的clip_layer可以被点击
 

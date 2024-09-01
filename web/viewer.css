@@ -1317,15 +1317,16 @@ dialog :link {
 
 .clip_item_container{
   position: absolute;
-  border-color: rgb(255, 0, 0);
+  border-color: rgb(118, 118, 118);
   border-style: dashed;
   border-width: 4px;
 }
 .clip_item_container.clip-hover{
   border-style: solid;
+  border-color: rgb(255, 245, 59);
 }
 
 .clip_item_container.clip-selected{
   border-style: solid;
-  border-color: rgb(0, 0, 255);
+  border-color: rgba(0, 136, 255, 0.831);
 }
