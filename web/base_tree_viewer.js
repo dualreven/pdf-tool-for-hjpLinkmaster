@@ -126,15 +126,14 @@ class BaseTreeViewer {
   _finishRendering(fragment, count, hasAnyNesting = false) {
     if (hasAnyNesting) {
       this.container.classList.add("treeWithDeepNesting");
-
       this._lastToggleIsShow = !fragment.querySelector(".treeItemsHidden");
     }
     // Pause translation when inserting the tree into the DOM.
     this._l10n.pause();
     this.container.append(fragment);
     this._l10n.resume();
-
-    this._dispatchEvent(count);
+    
+    // this._dispatchEvent(count);
   }
 
   render(params) {

@@ -80,5 +80,6 @@ class ProtoDataBase:
         data = {}
         for key, value in self._uuid_data.items():
             data[key] = value.to_dict()
+        # print(data)
         with open(self.infofile_path, 'w') as file:
             json.dump(data, file)

@@ -5,12 +5,20 @@ class ProtoJsBridge(QObject):
         super().__init__()
         self.superior = superior
 
+class ProtoBrowser(QWebEngineView):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def contextMenuEvent(self, event):
+        # 阻止默认的上下文菜单
+        event.ignore()
+
 
 class ProtoWebWindowClass(QMainWindow):
     def __init__(self, src: str, js_bridge: Type[QObject]):
         super().__init__()
         self.setGeometry(100, 100, 800, 600)
-        self.browser = QWebEngineView()
+        self.browser = ProtoBrowser()
         # self.setWindowFlags(Qt.WindowType.CustomizeWindowHint)
         central_widget = QWidget()
         central_widget.setStyleSheet("margin: 0px; padding: 0px;")
@@ -30,12 +38,13 @@ class ProtoWebWindowClass(QMainWindow):
         setting.setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
         setting.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
         setting.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessFileUrls, True)
+
         self.set_web(src)
         self.channel = QWebChannel(self)
         self.js_bridge = js_bridge(self)
         self.channel.registerObject(BACKEND_NAME, self.js_bridge)
         self.browser.page().setWebChannel(self.channel)
-        self.dev_tools.hide()
+        # self.dev_tools.hide()
 
     # @abc.abstractmethod
     def set_web(self, src: str):

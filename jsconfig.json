@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true,
+
     "paths": {
       "pdfjs-lib": ["./web/src/pdf.js"],
       "pdfjs-web/": ["./web/"],
@@ -32,5 +36,5 @@
       "web-toolbar": ["./web/toolbar.js"]
     }
   },
-  "include": ["./web/**/*"]
+  "include": ["./**/*"]
 }

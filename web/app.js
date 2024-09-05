@@ -1441,9 +1441,10 @@ const PDFViewerApplication = {
       if (this.pdf_info.outline===""){
         this.pdfOutlineViewer.convert_OldOutline_to_newOutline().then(
           outline=>{
-            window.backend.upload_pdf_outline(JSON.stringify(outline.toDict()))
-            this.pdf_info.outline = outline.uuid
-            this.pdfOutlineViewer.render({ outline, pdfDocument });
+            // window.backend.upload_pdf_outline(JSON.stringify(outline.toDict()))
+            // this.pdf_info.outline = outline.uuid
+            this.pdfOutlineViewer.render({ outline, pdfDocument,needSave:true });
+
           }
         )
       }

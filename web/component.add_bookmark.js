@@ -45,7 +45,7 @@ class AddBookMark{
         this.cancelButton.addEventListener("click", this.close.bind(this));
         this.submitButton.addEventListener("click", this.submit.bind(this));
         this.eventBus.on(CONSTANTS.eventName.SOME_MONO_MODE_START,(e)=>{
-            if(e.signal!==CONSTANTS.eventName.PDF_ADD_BOOKMARK_START && this.opened){
+            if(e.signal!==CONSTANTS.eventName.ADD_BOOKMARK_START && this.opened){
                 this.close();
             }
         })
@@ -65,7 +65,7 @@ class AddBookMark{
         this.parentList.selectedIndex = 0;
         this.opened = true;
         this.eventBus.dispatch(CONSTANTS.eventName.SOME_MONO_MODE_START,{
-            signal:CONSTANTS.eventName.PDF_ADD_BOOKMARK_START
+            signal:CONSTANTS.eventName.ADD_BOOKMARK_START
         })
     }
 
@@ -83,6 +83,37 @@ class AddBookMark{
         
     }
 
+    
 }
-
+/**
+ * 获取当前 PDFViewer 的 dest
+ * @param {PDFViewer} pdfViewer PDFViewer 实例
+ * @returns {Array} dest 参数
+ */
+function getCurrentDest(pdfViewer) {
+    // 获取当前页面
+    const currentPageIndex = pdfViewer.currentPageNumber - 1;
+    const currentPageView = pdfViewer._pages[currentPageIndex];
+    
+    // 获取视图信息
+    const viewport = currentPageView.viewport;
+    const container = pdfViewer.container;
+    const containerRect = container.getBoundingClientRect();
+    const pageRect = currentPageView.div.getBoundingClientRect();
+    
+    // 计算相对位置
+    const relativeTop = (containerRect.top - pageRect.top) / viewport.scale;
+    const relativeLeft = (containerRect.left - pageRect.left) / viewport.scale;
+    
+    // 创建 dest 参数
+    const dest = [
+      currentPageView.pdfPage.ref,
+      { name: 'XYZ' },
+      relativeLeft,
+      viewport.height - relativeTop,
+      null
+    ];
+    
+    return dest;
+  }
 export {AddBookMark}

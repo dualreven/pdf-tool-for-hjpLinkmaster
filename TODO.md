@@ -1,18 +1,28 @@
 # 当前
 
 - https://github.com/mar10/fancytree/wiki 学习这个用法 https://poe.com/chat/3jo4e13rqqubov30wx1
-
 - 学习常规的 [pdf跳转](obsidian://open?vault=%E6%97%A5%E8%AE%B0%E7%BB%9F%E8%AE%A1&file=%E6%80%9D%E8%80%83%2F%E6%9C%AA%E5%91%BD%E5%90%8D) 并实现.
 
-
 - 修改从服务端获取clip的逻辑,考虑到将来clip数量众多,我们只按需获取加载的clip,因此还需要修改clip的数据结构上一级是页码,才能在需要加载的时候下载.
-- clip的选择后添加一个工具条(复制链接|添加到当前(正面|背面)|添加到新增(正面|背面)|删除|添加评论)
 
-- clip在创建完成的状态下,hover可高亮曾经选中的,并提前他的zindex
+
+- 了解如何获取一个可用的dest.
+
+```
+// 使用示例
+const pdfViewer = PDFViewerApplication.pdfViewer;
+const currentDest = getCurrentDest(pdfViewer);
+
+// 使用生成的 dest 参数进行跳转
+PDFViewerApplication.pdfLinkService.goToDestination(currentDest);
+```
+- outline右键.底部添加操作按钮(重命名,重定向,移动,删除,添加)
 
   
 
 # 待办
+- outline右键添加展开/收起子结点,展开/收起全部结点.
+- click事件中要区分鼠标左右键来反馈
 
 - 删除旋转功能
 
@@ -20,11 +30,6 @@
 
 - clip数据的读取
 
-- outline用现有组件重写fancyTree实现复杂交互.  
-
-- outline修改的保存
-
-- outline右键.底部添加操作按钮(重命名,重定向,移动,删除,添加)
 
 - clip在page刷新时应保持相对位置不变
 
@@ -129,6 +134,20 @@
   
 
 # 已完成
+2024年9月5日10:00:03
+- outline用现有组件重写jstree实现复杂交互.  
+- outlineitem修改他的数据格式,以满足jstree的需求
+- outline修改的保存
+- outline-item 的收起展开保存到 outline的数据结构中
+- 实现一个outline.to_json之后的数据再转标准outlineObject的函数
+
+2024年9月1日15:38:53
+- clip的选择后添加一个工具条(复制链接|添加到当前(正面|背面)|添加到新增(正面|背面)|删除|添加评论)
+- clip在创建完成的状态下,hover可高亮曾经选中的,并提前他的zindex
+
+2024年9月1日12:50:58
+- 修复了clipitem的一些bug,比如刷新page的时候会失去operation的状态
+- 修复刷新后位置回到原位的问题
 2024年8月31日23:49:27
 - create clip的时候,超出边界应该修正
 - clip 拖动特效

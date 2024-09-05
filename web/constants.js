@@ -19,8 +19,8 @@ export const CONSTANTS={
       SOME_MONO_MODE_START:"some_mono_mode_start",
     },
     mouseButton:{
-      LEFT:1,
-      MIDDLE:4,
+      LEFT:0,
+      MIDDLE:1,
       RIGHT:2
     }
   }

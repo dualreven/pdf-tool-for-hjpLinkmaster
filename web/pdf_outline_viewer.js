@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/// <reference path="../types.pdf_viewer.d.ts" />
 /** @typedef {import("./event_utils.js").EventBus} EventBus */
 // eslint-disable-next-line max-len
 /** @typedef {import("./download_manager.js").DownloadManager} DownloadManager */
@@ -53,8 +53,9 @@
 
 import { BaseTreeViewer } from "./base_tree_viewer.js";
 import { SidebarView } from "./ui_utils.js";
-import { PDFOutlineObject } from "./types.js"
+import { PDFOutlineObject,PDFOutlineItem } from "./types.js"
 import {PDFViewerApplication} from "./app.js"
+import { CONSTANTS } from "./constants.js";
 
 /**
  * @typedef {Object} PDFOutlineViewerOptions
@@ -69,6 +70,62 @@ import {PDFViewerApplication} from "./app.js"
  * @property {PDFOutlineObject} outline - An array of outline objects.
  * @property {PDFDocumentProxy} pdfDocument - A {PDFDocument} instance.
  */
+
+/**
+ * @typedef {Object} jstreeNode
+ * @property {jstreeNode[]} children
+ * @property {string[]} parents
+ * @property {string} text
+ * @property {string} id
+ * @property {Object} data
+ * @property {Object} state
+ */
+
+/**
+ * @typedef {Object} jstreeMoveNodeEvent
+ * @property {HTMLElement} currentTarget
+ * @property {HTMLElement} delegateTarget
+ * @property {HTMLElement} target
+ * @property {Object} handleObj
+ * @property {number} timeStamp
+ * @property {Object} data
+ * @property {Object} result
+ */
+
+/**
+ * @typedef {Object} jstreeMoveNodeEventData
+ * @property {Object} instance
+ * @property {Object} new_instance
+ * @property {Object} old_instance
+ * @property {string} parent
+ * @property {string} old_parent
+ * @property {number} position
+ * @property {number} old_position 
+ * @property {jstreeNode} node
+ * @property {boolean} is_multi
+ * @property {boolean} is_foreign
+ */
+
+
+/**
+ * @typedef {Object} jstreeSelectNodeEvent
+ * @property {HTMLElement} currentTarget
+ * @property {HTMLElement} delegateTarget
+ * @property {HTMLElement} target
+ * @property {Object} handleObj
+ * @property {number} timeStamp
+ * @property {Object} data
+ * @property {Object} result
+ */
+
+/**
+ * @typedef {Object} jstreeSelectNodeEventData
+ * @property {jstreeSelectNodeEvent} event
+ * @property {Object} instance
+ * @property {jstreeNode} node
+ * @property {string[]} selected
+ */
+
 
 class PDFOutlineViewer extends BaseTreeViewer {
   /**
@@ -245,53 +302,189 @@ class PDFOutlineViewer extends BaseTreeViewer {
   /**
    * @param {PDFOutlineViewerRenderParameters} params
    */
-  render({ outline, pdfDocument }) {
+  render({ outline, pdfDocument,needSave=false }) {
+    console.log("jstree",outline)
     if (this._outline) {
       this.reset();
     }
-    this._outline = outline || null;
+    this._outline = outline;
     this._pdfDocument = pdfDocument || null;
 
     if (!outline) {
       this._dispatchEvent(/* outlineCount = */ 0);
       return;
     }
-
-    const fragment = document.createDocumentFragment();
-    const queue = [{ parent: fragment, items: outline.items }];
-    let outlineCount = 0,
-      hasAnyNesting = false;
-    while (queue.length > 0) {
-      const levelData = queue.shift();
-
-      for (const item of levelData.items) {
-        const div = document.createElement("div");
-        div.className = "treeItem";
-
-        const element = document.createElement("a");
-        this._bindLink(element, item);
-        // this._setStyles(element, item);
-        element.textContent = item.title;//this._normalizeTextContent(item.title);
-
-        div.append(element);
-
-        if (item.items.length > 0) {
-          hasAnyNesting = true;
-          this._addToggleButton(div, true);
-
-          const itemsDiv = document.createElement("div");
-          itemsDiv.className = "treeItems";
-          div.append(itemsDiv);
-
-          queue.push({ parent: itemsDiv, items: item.items });
+    const { linkService ,saveOutline} = this;
+    const self = this
+    const fragment = document.createElement("div");
+    $(function () {
+      $(fragment).jstree({
+        core: {
+          themes: {
+            icons: false,
+          },
+          check_callback: true,
+          data: outline.children,
+        },
+        plugins: ["dnd", "contextmenu"],
+        contextmenu: {
+            items: function (node) {
+              return {
+                Create: {
+                  label: "创建子节点",
+                  action: function (data) {
+                    selectedNode = data.reference;
+                    $("#node-dialog").show();
+                  },
+                },
+                Rename: {
+                  label: "重命名",
+                  action: function (data) {
+                    var inst = $.jstree.reference(data.reference);
+                    var obj = inst.get_node(data.reference);
+                    inst.edit(obj);
+                  },
+                },
+                Delete: {
+                  label: "删除",
+                  action: function (data) {
+                    var inst = $.jstree.reference(data.reference);
+                    var obj = inst.get_node(data.reference);
+                    if (inst.is_selected(obj)) {
+                      inst.delete_node(inst.get_selected());
+                    } else {
+                      inst.delete_node(obj);
+                    }
+                  },
+                },
+                toggle:{
+                  label:"展开/折叠",
+                  action:function(data){
+                    console.log(data);
+                    var inst = $.jstree.reference(data.reference);
+                    var obj = inst.get_node(data.reference);
+                    inst.toggle_node(obj);
+                  }
+                },
+                openAll:{
+                  label:"展开所有",
+                  action:function(data){
+                    console.log(data);
+                    var inst = $.jstree.reference(data.reference);
+                    inst.open_all();
+                  }
+                },
+                closeAll:{
+                  label:"折叠所有",
+                  action:function(data){
+                    console.log(data);
+                    var inst = $.jstree.reference(data.reference);
+                    inst.close_all();
+                  }
+                }
+              };
+            },
+          },
+      });
+      $(fragment).on("ready.jstree", function (e, data) {
+        if(needSave){
+          self.saveOutline();
+        }      
+      });
+      $(fragment).on("select_node.jstree", function (e, data) {
+        var node = data.node;
+        var nodeData = node.data;
+        console.log(e,data);
+        if (data.event.button === CONSTANTS.mouseButton.LEFT){
+          linkService.goToDestination(nodeData.dest);
         }
+        // if (nodeData) {
+        //   $("#node-data").html(
+        //     "选中节点数据: ID = " +
+        //       nodeData.id +
+        //       ", 自定义字段 = " +
+        //       nodeData.custom_field
+        //   );
+        // } else {
+        //   $("#node-data").html("该节点没有附加数据");
+        // }
         
-        levelData.parent.append(div);
-        outlineCount++;
-      }
-    }
 
-    this._finishRendering(fragment, outlineCount, hasAnyNesting);
+      });
+
+      $(fragment).on("move_node.jstree", function (e, data) {
+        var movedNode = data.node;
+        var oldParent = data.old_parent;
+        var newParent = data.parent;
+        var oldPosition = data.old_position;
+        var newPosition = data.position;
+        // var moveInfo =
+        //   "节点移动信息:<br>" +
+        //   "移动的节点: " +
+        //   movedNode.text +
+        //   "<br>" +
+        //   "节点ID: " +
+        //   (movedNode.data ? movedNode.data.id : "无ID") +
+        //   "<br>" +
+        //   "自定义字段: " +
+        //   (movedNode.data ? movedNode.data.custom_field : "无自定义字段") +
+        //   "<br>" +
+        //   "原父节点: " +
+        //   oldParent +
+        //   "<br>" +
+        //   "新父节点: " +
+        //   newParent +
+        //   "<br>" +
+        //   "原位置: " +
+        //   oldPosition +
+        //   "<br>" +
+        //   "新位置: " +
+        //   newPosition;
+
+        // $("#move-info").html(moveInfo);
+        console.log(e,data);
+        saveOutline.bind(self)();
+      });
+      $("#cancel-create").on("click", function () {
+        $("#node-dialog").hide();
+        $("#node-name").val("");
+        $("#custom-field").val("");
+      });
+      setTimeout(() => {
+        console.log("outline rendered" ,$(fragment).jstree(true).get_json());
+      }, 100);
+      $(fragment).on('ready.jstree', function() {
+        $(this).jstree('open_all');
+      });
+    });
+    
+    // const queue = [{ parent: fragment, children: outline.children }];
+    // let outlineCount = 0,
+    //   hasAnyNesting = false;
+    
+    // while (queue.length > 0) {
+    //   const levelData = queue.shift();
+    //   for (const item of levelData.children) {
+    //     const div = document.createElement("div");
+    //     div.className = "treeItem";
+    //     const element = document.createElement("a");
+    //     this._bindLink(element, item);
+    //     element.textContent = item.title;
+    //     div.append(element);
+    //     if (item.children.length > 0) {
+    //       hasAnyNesting = true;
+    //       this._addToggleButton(div, true);
+    //       const itemsDiv = document.createElement("div");
+    //       itemsDiv.className = "treeItems";
+    //       div.append(itemsDiv);
+    //       queue.push({ parent: itemsDiv, items: item.items });
+    //     }
+    //     levelData.parent.append(div);
+    //     outlineCount++;
+    //   }
+    // }
+
+    this._finishRendering(fragment, 0, false);
 
   }
 
@@ -398,6 +591,10 @@ class PDFOutlineViewer extends BaseTreeViewer {
     return this._pageNumberToDestHashCapability.promise;
   }
 
+  /**
+   * Convert the old outline to the new one.
+   * @returns {Promise<PDFOutlineObject|null>} The new outline object, or null if the conversion failed.
+   */
   async convert_OldOutline_to_newOutline(){
     /**
      * @type {OldPDFOutline|null}
@@ -406,6 +603,17 @@ class PDFOutlineViewer extends BaseTreeViewer {
     const new_outline  = await PDFOutlineObject.from_oldOutline(PDFViewerApplication.pdf_info.uuid,old_outline);
     return new_outline;
   }
+  
+  saveOutline(){
+    /** @type{jstreeNode[]} */
+    const _saveData = $(document.querySelector(".jstree")).jstree(true).get_json();
+    // console.log("saveData = ", _saveData,"this._outline=",this._outline,"this=",this);
+    this._outline.children = _saveData.map((item)=>new PDFOutlineItem(item));
+    this._outline.updated_at = Number(new Date());
+    // console.log("this._outline=",this._outline.toDict());
+    window.backend.upload_pdf_outline(this._outline.toString());
+  }
+
 }
 
 export { PDFOutlineViewer };

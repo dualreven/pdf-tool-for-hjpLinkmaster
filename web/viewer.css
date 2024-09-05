@@ -1317,7 +1317,7 @@ dialog :link {
 
 .clip_item_container{
   position: absolute;
-  border-color: rgb(118, 118, 118);
+  border-color: rgb(185, 185, 185);
   border-style: dashed;
   border-width: 4px;
 }
@@ -1329,4 +1329,29 @@ dialog :link {
 .clip_item_container.clip-selected{
   border-style: solid;
   border-color: rgba(0, 136, 255, 0.831);
+}
+.clip_item_container.clip-selected>.clip_item_control_bar{
+  background-color: #ccc;
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  cursor: se-resize;
+}
+
+.clip_item_container.clip-selected>.clip_item_control_bar:hover{
+  background-color: #cb0909;
+}
+
+#clipItemToolBar{
+  background-color: aliceblue;
+  position: absolute;
+  bottom: -38px;
+  left: 0;
+  display: flex;
+  width: fit-content;
+  flex-direction: row;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
 }

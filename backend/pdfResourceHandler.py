@@ -5,34 +5,36 @@ from .protoDataBase import ProtoDataBase
 
 
 class PDFOutlineItem:
-    def __init__(self, title: str, page: int,items:dict):
-        self.title = title
-        self.page = page
-        self.items:list[PDFOutlineItem] = [PDFOutlineItem(**item) for item in items]
+    def __init__(self, text: str, data: dict,children:dict,state:dict = None,id:str = None):
+        self.text = text
+        self.data = data
+        self.state= state if state is not None else {"opened": False}
+        self.id = id if id is not None else "outline-item-"+str(uuid.uuid4())[:8]
+        self.children:list[PDFOutlineItem] = [PDFOutlineItem(**item) for item in children]
 
     def to_dict(self):
-        d= {"title": self.title, "page": self.page, "items": []}
-        for child in self.items:
-            d["items"].append(child.to_dict())
+        d= {"text": self.text, "data": self.data, "children": [], "id": self.id, "state": self.state}
+        for child in self.children:
+            d["children"].append(child.to_dict())
 
         return d
 
 @dataclasses.dataclass
 class PDFOutlineObject:
 
-    def __init__(self,pdf_uuid,uuid,items,created_at,updated_at):
+    def __init__(self,pdf_uuid,uuid,children,created_at,updated_at):
         self.pdf_uuid:str = pdf_uuid
         self.uuid:str = uuid
-        self.items:list[PDFOutlineItem] = [PDFOutlineItem(**item) for item in items]
+        self.children:list[PDFOutlineItem] = [PDFOutlineItem(**item) for item in children]
         self.created_at:int = created_at
         self.updated_at:int = updated_at
 
 
 
     def to_dict(self):
-        d= {"pdf_uuid": self.pdf_uuid, "uuid": self.uuid, "created_at": self.created_at, "updated_at": self.updated_at, "items": []}
-        for item in self.items:
-            d["items"].append(item.to_dict())
+        d= {"pdf_uuid": self.pdf_uuid, "uuid": self.uuid, "created_at": self.created_at, "updated_at": self.updated_at, "children": []}
+        for item in self.children:
+            d["children"].append(item.to_dict())
         return d
 
 
@@ -78,6 +80,7 @@ class PDFClipInfoObject:
     created_at: int = dataclasses.field(default_factory=lambda: int(time.time()))
     edit_at: int = dataclasses.field(default_factory=lambda: int(time.time()))
     comment: str = ""
+    clip_name:str = ""
     clip_type:int = CLIP_TYPE.IMAGE
     def to_dict(self):
         return dataclasses.asdict(self)
